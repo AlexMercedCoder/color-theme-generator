@@ -1,0 +1,22 @@
+export const googleFonts = [
+    "Roboto",
+    "Open Sans",
+    "Lato",
+    "Montserrat",
+    "Raleway",
+    "Poppins",
+    "Nunito",
+    "Merriweather",
+    "Playfair Display",
+    "Lora",
+    "Ubuntu",
+    "Oswald",
+    "Source Sans Pro",
+    "Slabo 27px",
+    "PT Sans",
+    "Roboto Condensed",
+    "Anton",
+    "Mukta",
+    "Bitter",
+    "Dosis"
+];

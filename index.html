@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Theme Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>ThemeGen</h1>
+        <nav>
+            <!-- Future links -->
+        </nav>
+    </header>
+
+    <main>
+        <!-- Control Panel -->
+        <aside class="panel control-panel">
+            <h2>Controls</h2>
+            
+            <div class="control-group">
+                <label for="palette-mode">Palette Mode</label>
+                <select id="palette-mode">
+                    <option value="random">Random</option>
+                    <option value="monochromatic">Monochromatic</option>
+                    <option value="complementary">Complementary</option>
+                    <option value="triadic">Triadic</option>
+                </select>
+            </div>
+
+            <button id="generate-btn" class="primary-btn">Generate New Theme</button>
+            
+            <hr>
+            
+            <div class="control-group">
+                <label>Current Colors</label>
+                <div id="color-swatches">
+                    <!-- Swatches will go here -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Preview Area -->
+        <section class="preview-container">
+            <div id="preview-frame">
+                <div id="preview-header">
+                    <h3>Brand</h3>
+                    <div>Menu</div>
+                </div>
+                <div id="preview-hero">
+                    <h2>Build Something Amazing</h2>
+                    <p>This is how your typography and colors will look in a real layout.</p>
+                    <div style="margin-top: 2rem;">
+                        <button class="preview-btn preview-btn-primary">Get Started</button>
+                        <button class="preview-btn preview-btn-secondary">Learn More</button>
+                    </div>
+                </div>
+                <div id="preview-content">
+                    <div class="preview-card">
+                        <h4>Content Section</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Output Panel -->
+        <aside class="panel output-panel">
+            <h2>Output</h2>
+            
+            <div class="control-group">
+                <label>JSON Data</label>
+                <textarea id="json-output" readonly></textarea>
+                <button id="copy-json-btn" class="secondary-btn">Copy JSON</button>
+            </div>
+
+            <div class="control-group">
+                <label>LLM Prompt</label>
+                <textarea id="prompt-output" readonly></textarea>
+                <button id="copy-prompt-btn" class="secondary-btn">Copy Prompt</button>
+            </div>
+        </aside>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

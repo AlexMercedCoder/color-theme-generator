@@ -1,0 +1,225 @@
+:root {
+    --primary: #123456;
+    --secondary: #abcdef;
+    --accent: #789abc;
+    --background: #ffffff;
+    --surface: #f5f5f5;
+    --text: #000000;
+    --heading-font: 'Roboto', sans-serif;
+    --body-font: 'Open Sans', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap: 2rem;
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.panel {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    height: fit-content;
+}
+
+.control-panel {
+    grid-column: 1;
+}
+
+.preview-container {
+    grid-column: 2;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+}
+
+.output-panel {
+    grid-column: 3;
+}
+
+/* Controls */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+select, button {
+    padding: 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button.primary-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+
+button.primary-btn:hover {
+    background-color: #0056b3;
+}
+
+button.secondary-btn {
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+button.secondary-btn:hover {
+    background-color: #e2e6ea;
+}
+
+.swatch {
+    width: 100%;
+    height: 40px;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+    font-size: 0.8rem;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Preview Area (Simulated Website) */
+#preview-frame {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background);
+    color: var(--text);
+    font-family: var(--body-font);
+    transition: all 0.3s ease;
+}
+
+#preview-header {
+    background-color: #fff; /* Will be overridden by theme */
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+#preview-hero {
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: var(--surface);
+}
+
+#preview-hero h2 {
+    font-family: var(--heading-font);
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+#preview-content {
+    padding: 3rem 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.preview-card {
+    background-color: var(--surface);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.preview-btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0.5rem;
+}
+
+.preview-btn-primary {
+    background-color: var(--primary);
+    color: white; /* Need to ensure contrast later */
+}
+
+.preview-btn-secondary {
+    background-color: var(--secondary);
+    color: var(--text);
+}
+
+/* Output Areas */
+textarea {
+    width: 100%;
+    height: 200px;
+    padding: 0.5rem;
+    font-family: monospace;
+    font-size: 0.85rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    resize: vertical;
+    background: #f8f9fa;
+}
+
+@media (max-width: 1024px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+    .control-panel, .preview-container, .output-panel {
+        grid-column: 1;
+    }
+}
