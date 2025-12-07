@@ -11,9 +11,10 @@
 
     <header>
         <h1>ThemeGen</h1>
-        <nav>
-            <!-- Future links -->
-        </nav>
+        <div class="header-controls">
+            <button id="undo-btn" class="icon-btn" disabled title="Undo">↩</button>
+            <button id="redo-btn" class="icon-btn" disabled title="Redo">↪</button>
+        </div>
     </header>
 
     <main>
@@ -36,7 +37,7 @@
             <hr>
             
             <div class="control-group">
-                <label>Current Colors</label>
+                <label>Current Colors <span id="contrast-badge" class="badge"></span></label>
                 <div id="color-swatches">
                     <!-- Swatches will go here -->
                 </div>
@@ -48,7 +49,11 @@
             <div id="preview-frame">
                 <div id="preview-header">
                     <h3>Brand</h3>
-                    <div>Menu</div>
+                    <nav class="preview-nav">
+                        <a href="#">Home</a>
+                        <a href="#">About</a>
+                        <a href="#">Contact</a>
+                    </nav>
                 </div>
                 <div id="preview-hero">
                     <h2>Build Something Amazing</h2>
@@ -62,6 +67,10 @@
                     <div class="preview-card">
                         <h4>Content Section</h4>
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                        <div class="preview-form-group">
+                            <label>Email Address</label>
+                            <input type="text" placeholder="name@example.com">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -82,8 +91,18 @@
                 <textarea id="prompt-output" readonly></textarea>
                 <button id="copy-prompt-btn" class="secondary-btn">Copy Prompt</button>
             </div>
+            
+            <div class="control-group">
+                <label>Share Link</label>
+                <input type="text" id="share-link" readonly>
+                <button id="copy-link-btn" class="secondary-btn">Copy Link</button>
+            </div>
         </aside>
     </main>
+    
+    <footer>
+        Created by <a href="https://alexmerced.com" target="_blank">AlexMerced</a>
+    </footer>
 
     <script src="script.js"></script>
 </body>

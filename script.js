@@ -22,7 +22,7 @@ const googleFonts = [
 ];
 
 // State
-const state = {
+let state = {
     colors: {
         primary: "#123456",
         secondary: "#abcdef",
@@ -37,24 +37,40 @@ const state = {
     }
 };
 
+let history = [];
+let historyIndex = -1;
+let isNavigatingHistory = false;
+
 // DOM Elements
 const previewFrame = document.getElementById('preview-frame');
 const jsonOutput = document.getElementById('json-output');
 const promptOutput = document.getElementById('prompt-output');
+const shareLinkInput = document.getElementById('share-link');
 const generateBtn = document.getElementById('generate-btn');
 const copyJsonBtn = document.getElementById('copy-json-btn');
 const copyPromptBtn = document.getElementById('copy-prompt-btn');
+const copyLinkBtn = document.getElementById('copy-link-btn');
+const undoBtn = document.getElementById('undo-btn');
+const redoBtn = document.getElementById('redo-btn');
+const contrastBadge = document.getElementById('contrast-badge');
 
 // Initialization
 function init() {
-    generateTheme();
+    if (window.location.hash) {
+        loadFromHash();
+    } else {
+        generateTheme();
+    }
     setupEventListeners();
 }
 
 function setupEventListeners() {
-    generateBtn.addEventListener('click', generateTheme);
+    generateBtn.addEventListener('click', () => generateTheme());
     copyJsonBtn.addEventListener('click', () => copyToClipboard(jsonOutput.value));
     copyPromptBtn.addEventListener('click', () => copyToClipboard(promptOutput.value));
+    copyLinkBtn.addEventListener('click', () => copyToClipboard(shareLinkInput.value));
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
 }
 
 // Core Logic
@@ -161,9 +177,15 @@ function hslToHex(h, s, l) {
 
 // UI Updates
 function updateUI() {
+    if (!isNavigatingHistory) {
+        addToHistory();
+    }
     updatePreview();
     updateOutputs();
     renderSwatches();
+    updateHash();
+    checkContrast();
+    updateHistoryButtons();
 }
 
 function renderSwatches() {
@@ -174,7 +196,28 @@ function renderSwatches() {
         const swatch = document.createElement('div');
         swatch.className = 'swatch';
         swatch.style.backgroundColor = value;
-        swatch.innerHTML = `<span>${key}</span><span>${value}</span>`;
+        
+        const label = document.createElement('span');
+        label.innerText = key;
+        
+        const input = document.createElement('input');
+        input.type = 'color';
+        input.value = value;
+        input.addEventListener('input', (e) => {
+            state.colors[key] = e.target.value;
+            // Don't add to history on every drag, maybe debounce or just update preview
+            // For simplicity, just update preview and hash, add to history on change (blur)
+            updatePreview();
+            updateHash();
+            checkContrast();
+        });
+        input.addEventListener('change', () => {
+             addToHistory(); // Add to history when user finishes picking
+             updateOutputs();
+        });
+
+        swatch.appendChild(label);
+        swatch.appendChild(input);
         container.appendChild(swatch);
     }
 }
@@ -243,6 +286,106 @@ function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
         alert('Copied to clipboard!');
     });
+}
+
+// History
+function addToHistory() {
+    // Remove future history if we were in the middle
+    if (historyIndex < history.length - 1) {
+        history = history.slice(0, historyIndex + 1);
+    }
+    history.push(JSON.parse(JSON.stringify(state)));
+    historyIndex++;
+    updateHistoryButtons();
+}
+
+function undo() {
+    if (historyIndex > 0) {
+        historyIndex--;
+        state = JSON.parse(JSON.stringify(history[historyIndex]));
+        isNavigatingHistory = true;
+        updateUI();
+        isNavigatingHistory = false;
+    }
+}
+
+function redo() {
+    if (historyIndex < history.length - 1) {
+        historyIndex++;
+        state = JSON.parse(JSON.stringify(history[historyIndex]));
+        isNavigatingHistory = true;
+        updateUI();
+        isNavigatingHistory = false;
+    }
+}
+
+function updateHistoryButtons() {
+    undoBtn.disabled = historyIndex <= 0;
+    redoBtn.disabled = historyIndex >= history.length - 1;
+}
+
+// URL Hash / Deep Linking
+function updateHash() {
+    const params = new URLSearchParams();
+    for (const [k, v] of Object.entries(state.colors)) {
+        params.set(k, v);
+    }
+    params.set('heading', state.fonts.headingFont);
+    params.set('body', state.fonts.bodyFont);
+    
+    const hash = params.toString();
+    window.location.hash = hash;
+    shareLinkInput.value = window.location.href;
+}
+
+function loadFromHash() {
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    if (params.has('primary')) {
+        state.colors.primary = params.get('primary');
+        state.colors.secondary = params.get('secondary');
+        state.colors.accent = params.get('accent');
+        state.colors.background = params.get('background');
+        state.colors.surface = params.get('surface');
+        state.colors.text = params.get('text');
+        state.fonts.headingFont = params.get('heading');
+        state.fonts.bodyFont = params.get('body');
+    }
+}
+
+// Accessibility
+function checkContrast() {
+    const bg = state.colors.background;
+    const txt = state.colors.text;
+    const ratio = getContrastRatio(bg, txt);
+    
+    contrastBadge.innerText = `Contrast: ${ratio.toFixed(2)}`;
+    contrastBadge.className = 'badge ' + (ratio >= 4.5 ? 'pass' : 'fail');
+}
+
+function getContrastRatio(c1, c2) {
+    const lum1 = getLuminance(c1);
+    const lum2 = getLuminance(c2);
+    const brightest = Math.max(lum1, lum2);
+    const darkest = Math.min(lum1, lum2);
+    return (brightest + 0.05) / (darkest + 0.05);
+}
+
+function getLuminance(hex) {
+    const rgb = hexToRgb(hex);
+    const a = rgb.map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+}
+
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? [
+        parseInt(result[1], 16),
+        parseInt(result[2], 16),
+        parseInt(result[3], 16)
+    ] : [0, 0, 0];
 }
 
 // Start
