@@ -7,11 +7,16 @@ A single-page web application that generates random website themes (color palett
 - **Lock Colors**: Keep your favorite colors while regenerating the rest.
 - **Multi-Format Export**: Get your theme in JSON, CSS Variables, or Tailwind Config.
 - **Live Preview**: See your theme applied instantly to a realistic mini-webpage.
+- **Multiple Layouts**: Preview on Landing Page, Dashboard, Blog, or E-commerce layouts.
 - **Manual Tweaking**: Fine-tune individual colors with pickers.
 - **History**: Undo/Redo your generations to find that perfect theme you skipped.
+- **Saved Themes**: Build a personal library of themes that persists in your browser.
 - **Accessibility Check**: Real-time contrast ratio calculation (WCAG).
+- **Vision Simulator**: Test your theme against various forms of color blindness.
 - **Shareable Links**: Deep linking support to share specific themes.
 - **Keyboard Shortcuts**: Generate (Space), Undo (Ctrl+Z), and more.
+- **Gradient Generator**: Create beautiful CSS gradients from your palette.
+- **App Dark Mode**: Toggle the generator's interface between light and dark.
 - **LLM Ready**: One-click copy for JSON data and a structured prompt for AI coding assistants.
 
 ## Usage
@@ -19,8 +24,10 @@ A single-page web application that generates random website themes (color palett
 2. Select a **Palette Mode** (or leave as Random).
 3. Click **Generate New Theme** (or press Space).
 4. **Lock** any colors you like by clicking the lock icon.
-5. Tweak colors using the swatches if needed.
-6. Select your preferred output format (JSON/CSS/Tailwind) and copy.
+5. Switch **Preview Layouts** to see how it looks in different contexts.
+6. Use the **Vision Simulator** to ensure accessibility.
+7. Click **Save Current Theme** to keep it for later.
+8. Select your preferred output format (JSON/CSS/Tailwind) and copy.
 
 ## Installation
 No installation required! This is a static site.

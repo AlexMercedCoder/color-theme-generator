@@ -55,13 +55,21 @@ A custom Toast notification system replaces browser alerts for non-intrusive fee
 Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`.
 
 ### Preview System
-The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that are updated in real-time by JavaScript. This allows the preview to reflect the state instantly without reloading.
+The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that are updated in real-time by JavaScript. It supports multiple layouts:
+- **Landing Page**: Standard hero + content.
+- **Dashboard**: Sidebar + data widgets.
+- **Blog**: Typography focused.
+- **E-commerce**: Product grid.
 
-### History System
-A stack-based history system (`history` array + `historyIndex`) enables Undo/Redo functionality. Every state change (generation or manual tweak) pushes a snapshot to the history stack.
+### Accessibility Tools
+- **Contrast Checker**: WCAG ratio calculation.
+- **Color Blindness Simulator**: SVG filters to simulate Protanopia, Deuteranopia, Tritanopia, and Achromatopsia.
 
-### Deep Linking
-The application state is serialized into the URL hash (e.g., `#primary=...&secondary=...`). On load, the app checks for a hash and hydrates the state if present, allowing for shareable links.
+### Persistence
+- **History**: Stack-based Undo/Redo.
+- **Saved Themes**: `localStorage` persistence for a personal library of themes.
+- **Deep Linking**: URL hash state.
 
-### Accessibility
-A contrast checker calculates the WCAG contrast ratio between the background and text colors, displaying a Pass/Fail badge.
+### Utilities
+- **Gradient Generator**: Creates CSS gradients from the current palette.
+- **App Dark Mode**: Toggles the generator's UI theme.

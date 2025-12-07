@@ -12,6 +12,7 @@
     <header>
         <h1>ThemeGen</h1>
         <div class="header-controls">
+            <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
             <button id="undo-btn" class="icon-btn" disabled title="Undo">↩</button>
             <button id="redo-btn" class="icon-btn" disabled title="Redo">↪</button>
         </div>
@@ -33,6 +34,7 @@
             </div>
 
             <button id="generate-btn" class="primary-btn">Generate New Theme</button>
+            <button id="save-theme-btn" class="secondary-btn" style="margin-top: 0.5rem;">Save Current Theme</button>
             
             <hr>
             
@@ -42,36 +44,39 @@
                     <!-- Swatches will go here -->
                 </div>
             </div>
+
+            <hr>
+
+            <div class="control-group">
+                <label>Saved Themes</label>
+                <div id="saved-themes-list">
+                    <!-- Saved themes will appear here -->
+                    <div class="empty-state">No saved themes yet.</div>
+                </div>
+            </div>
         </aside>
 
         <!-- Preview Area -->
         <section class="preview-container">
-            <div id="preview-frame">
-                <div id="preview-header">
-                    <h3>Brand</h3>
-                    <nav class="preview-nav">
-                        <a href="#">Home</a>
-                        <a href="#">About</a>
-                        <a href="#">Contact</a>
-                    </nav>
-                </div>
-                <div id="preview-hero">
-                    <h2>Build Something Amazing</h2>
-                    <p>This is how your typography and colors will look in a real layout.</p>
-                    <div style="margin-top: 2rem;">
-                        <button class="preview-btn preview-btn-primary">Get Started</button>
-                        <button class="preview-btn preview-btn-secondary">Learn More</button>
-                    </div>
-                </div>
-                <div id="preview-content">
-                    <div class="preview-card">
-                        <h4>Content Section</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-                        <div class="preview-form-group">
-                            <label>Email Address</label>
-                            <input type="text" placeholder="name@example.com">
-                        </div>
-                    </div>
+            <div class="preview-controls">
+                <select id="preview-layout">
+                    <option value="landing">Landing Page</option>
+                    <option value="dashboard">Dashboard</option>
+                    <option value="blog">Blog Post</option>
+                    <option value="ecommerce">E-commerce</option>
+                </select>
+                <select id="vision-simulator">
+                    <option value="normal">Normal Vision</option>
+                    <option value="protanopia">Protanopia (Red-Blind)</option>
+                    <option value="deuteranopia">Deuteranopia (Green-Blind)</option>
+                    <option value="tritanopia">Tritanopia (Blue-Blind)</option>
+                    <option value="achromatopsia">Achromatopsia (Monochromacy)</option>
+                </select>
+            </div>
+            
+            <div id="preview-frame-wrapper">
+                <div id="preview-frame" class="layout-landing">
+                    <!-- Content injected by JS based on layout -->
                 </div>
             </div>
         </section>
@@ -88,6 +93,13 @@
                 </div>
                 <textarea id="code-output" readonly></textarea>
                 <button id="copy-code-btn" class="secondary-btn">Copy Code</button>
+            </div>
+
+            <div class="control-group">
+                <label>CSS Gradient</label>
+                <div id="gradient-preview" style="height: 40px; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid #ddd;"></div>
+                <textarea id="gradient-output" readonly style="height: 60px;"></textarea>
+                <button id="copy-gradient-btn" class="secondary-btn">Copy Gradient</button>
             </div>
 
             <div class="control-group">
@@ -109,6 +121,24 @@
     </footer>
 
     <div id="toast-container"></div>
+
+    <!-- SVG Filters for Color Blindness -->
+    <svg style="display: none;">
+        <defs>
+            <filter id="protanopia">
+                <feColorMatrix type="matrix" values="0.567, 0.433, 0, 0, 0  0.558, 0.442, 0, 0, 0  0, 0.242, 0.758, 0, 0  0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="deuteranopia">
+                <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0  0.7, 0.3, 0, 0, 0  0, 0.3, 0.7, 0, 0  0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="tritanopia">
+                <feColorMatrix type="matrix" values="0.95, 0.05, 0, 0, 0  0, 0.433, 0.567, 0, 0  0, 0.475, 0.525, 0, 0  0, 0, 0, 1, 0"/>
+            </filter>
+            <filter id="achromatopsia">
+                <feColorMatrix type="matrix" values="0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0, 0, 0, 1, 0"/>
+            </filter>
+        </defs>
+    </svg>
 
     <script src="script.js"></script>
 </body>
