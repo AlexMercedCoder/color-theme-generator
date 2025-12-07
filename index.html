@@ -35,6 +35,21 @@
 
             <button id="generate-btn" class="primary-btn">Generate New Theme</button>
             <button id="save-theme-btn" class="secondary-btn" style="margin-top: 0.5rem;">Save Current Theme</button>
+            <button id="download-brand-card-btn" class="secondary-btn" style="margin-top: 0.5rem;">Download Brand Card</button>
+            
+            <hr>
+
+            <div class="control-group">
+                <label>Vibe Check</label>
+                <div class="slider-group">
+                    <label for="sat-slider">Saturation</label>
+                    <input type="range" id="sat-slider" min="-50" max="50" value="0">
+                </div>
+                <div class="slider-group">
+                    <label for="bright-slider">Brightness</label>
+                    <input type="range" id="bright-slider" min="-50" max="50" value="0">
+                </div>
+            </div>
             
             <hr>
             
@@ -42,6 +57,26 @@
                 <label>Current Colors <span id="contrast-badge" class="badge"></span></label>
                 <div id="color-swatches">
                     <!-- Swatches will go here -->
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="control-group">
+                <label>Typography</label>
+                <div class="font-control">
+                    <label>Heading</label>
+                    <div class="font-display">
+                        <span id="heading-font-name">Roboto</span>
+                        <button class="lock-btn" id="lock-heading-btn" title="Lock Heading Font">🔓</button>
+                    </div>
+                </div>
+                <div class="font-control" style="margin-top: 0.5rem;">
+                    <label>Body</label>
+                    <div class="font-display">
+                        <span id="body-font-name">Open Sans</span>
+                        <button class="lock-btn" id="lock-body-btn" title="Lock Body Font">🔓</button>
+                    </div>
                 </div>
             </div>
 
@@ -89,6 +124,7 @@
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="json">JSON</button>
                     <button class="tab-btn" data-tab="css">CSS</button>
+                    <button class="tab-btn" data-tab="scss">SCSS</button>
                     <button class="tab-btn" data-tab="tailwind">Tailwind</button>
                 </div>
                 <textarea id="code-output" readonly></textarea>

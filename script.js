@@ -39,7 +39,11 @@ let state = {
     activeTab: 'json',
     darkMode: false,
     previewLayout: 'landing',
-    visionFilter: 'normal'
+    visionFilter: 'normal',
+    vibe: {
+        saturation: 0,
+        brightness: 0
+    }
 };
 
 let history = [];
@@ -56,6 +60,7 @@ const gradientPreview = document.getElementById('gradient-preview');
 const shareLinkInput = document.getElementById('share-link');
 const generateBtn = document.getElementById('generate-btn');
 const saveThemeBtn = document.getElementById('save-theme-btn');
+const downloadBrandCardBtn = document.getElementById('download-brand-card-btn');
 const copyCodeBtn = document.getElementById('copy-code-btn');
 const copyPromptBtn = document.getElementById('copy-prompt-btn');
 const copyGradientBtn = document.getElementById('copy-gradient-btn');
@@ -68,6 +73,12 @@ const tabBtns = document.querySelectorAll('.tab-btn');
 const previewLayoutSelect = document.getElementById('preview-layout');
 const visionSimulatorSelect = document.getElementById('vision-simulator');
 const savedThemesList = document.getElementById('saved-themes-list');
+const satSlider = document.getElementById('sat-slider');
+const brightSlider = document.getElementById('bright-slider');
+const lockHeadingBtn = document.getElementById('lock-heading-btn');
+const lockBodyBtn = document.getElementById('lock-body-btn');
+const headingFontName = document.getElementById('heading-font-name');
+const bodyFontName = document.getElementById('body-font-name');
 
 // Initialization
 function init() {
@@ -78,11 +89,13 @@ function init() {
     }
     renderSavedThemes();
     setupEventListeners();
+    updateFontUI();
 }
 
 function setupEventListeners() {
     generateBtn.addEventListener('click', () => generateTheme());
     saveThemeBtn.addEventListener('click', saveTheme);
+    downloadBrandCardBtn.addEventListener('click', downloadBrandCard);
     copyCodeBtn.addEventListener('click', () => copyToClipboard(codeOutput.value));
     copyPromptBtn.addEventListener('click', () => copyToClipboard(promptOutput.value));
     copyGradientBtn.addEventListener('click', () => copyToClipboard(gradientOutput.value));
@@ -109,6 +122,19 @@ function setupEventListeners() {
         updateVisionFilter();
     });
 
+    satSlider.addEventListener('input', (e) => {
+        state.vibe.saturation = parseInt(e.target.value);
+        applyVibe();
+    });
+
+    brightSlider.addEventListener('input', (e) => {
+        state.vibe.brightness = parseInt(e.target.value);
+        applyVibe();
+    });
+
+    lockHeadingBtn.addEventListener('click', () => toggleLock('headingFont'));
+    lockBodyBtn.addEventListener('click', () => toggleLock('bodyFont'));
+
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -133,6 +159,13 @@ function generateTheme() {
     const mode = document.getElementById('palette-mode').value;
     generateColors(mode);
     generateFonts();
+    
+    // Reset vibe sliders on new generation
+    state.vibe.saturation = 0;
+    state.vibe.brightness = 0;
+    satSlider.value = 0;
+    brightSlider.value = 0;
+
     updateUI();
 }
 
@@ -215,9 +248,12 @@ function generateTriadic(h, s, l) {
 }
 
 function generateFonts() {
-    const heading = googleFonts[Math.floor(Math.random() * googleFonts.length)];
-    const body = googleFonts[Math.floor(Math.random() * googleFonts.length)];
-    state.fonts = { headingFont: heading, bodyFont: body };
+    if (!state.locked.headingFont) {
+        state.fonts.headingFont = googleFonts[Math.floor(Math.random() * googleFonts.length)];
+    }
+    if (!state.locked.bodyFont) {
+        state.fonts.bodyFont = googleFonts[Math.floor(Math.random() * googleFonts.length)];
+    }
 }
 
 function getRandomHex() {
@@ -235,10 +271,103 @@ function hslToHex(h, s, l) {
     return `#${f(0)}${f(8)}${f(4)}`;
 }
 
+function hexToHsl(hex) {
+    let r = 0, g = 0, b = 0;
+    if (hex.length == 4) {
+        r = "0x" + hex[1] + hex[1];
+        g = "0x" + hex[2] + hex[2];
+        b = "0x" + hex[3] + hex[3];
+    } else if (hex.length == 7) {
+        r = "0x" + hex[1] + hex[2];
+        g = "0x" + hex[3] + hex[4];
+        b = "0x" + hex[5] + hex[6];
+    }
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    let cmin = Math.min(r,g,b),
+        cmax = Math.max(r,g,b),
+        delta = cmax - cmin,
+        h = 0,
+        s = 0,
+        l = 0;
+
+    if (delta == 0)
+        h = 0;
+    else if (cmax == r)
+        h = ((g - b) / delta) % 6;
+    else if (cmax == g)
+        h = (b - r) / delta + 2;
+    else
+        h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+
+    if (h < 0)
+        h += 360;
+
+    l = (cmax + cmin) / 2;
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return { h, s, l };
+}
+
+// Vibe Sliders
+function applyVibe() {
+    // This function modifies the current colors based on sliders
+    // Note: This is a destructive operation on the current state for simplicity,
+    // but in a real app you might want to store base colors separate from display colors.
+    // Here we will just regenerate from current hexes but shifted.
+    
+    // Actually, to make it non-destructive and smooth, we should probably apply it to the CSS variables
+    // and only commit to state when the slider is released? 
+    // For simplicity in this vanilla app, we'll update state directly but maybe we need a 'baseColors' state?
+    // Let's keep it simple: The sliders adjust the *current* colors. 
+    // But if you slide back and forth, you might lose precision.
+    // A better approach for this scope:
+    // When sliders move, we don't change state.colors, we just update the preview variables.
+    // But then the hex codes in UI won't match.
+    // Let's just update state.colors and accept some lossiness, or better:
+    // Re-generate the theme with new saturation/lightness offsets if we had the seed.
+    
+    // Alternative: The sliders are just for "tweaking" the current set.
+    // We will iterate over all unlocked colors, convert to HSL, add offset, convert back.
+    // To prevent drift, we should ideally store the "original" colors before sliding started.
+    // But that adds complexity. Let's try direct modification for now.
+    
+    // Wait, if I slide +10 then -10, I want to be back at 0.
+    // So I need a reference point.
+    // Let's assume the current state.colors IS the reference when generation happens.
+    // But if I slide, I need to know the base.
+    // Let's add `baseColors` to state.
+    
+    if (!state.baseColors) {
+        state.baseColors = { ...state.colors };
+    }
+
+    const sOffset = state.vibe.saturation;
+    const lOffset = state.vibe.brightness;
+
+    for (const key in state.baseColors) {
+        if (!state.locked[key]) {
+            const hsl = hexToHsl(state.baseColors[key]);
+            let newS = Math.min(100, Math.max(0, hsl.s + sOffset));
+            let newL = Math.min(100, Math.max(0, hsl.l + lOffset));
+            state.colors[key] = hslToHex(hsl.h, newS, newL);
+        }
+    }
+    
+    updateUI(true); // true = skip adding to history to avoid spamming stack while sliding
+}
+
 // UI Updates
-function updateUI() {
-    if (!isNavigatingHistory) {
+function updateUI(skipHistory = false) {
+    if (!skipHistory && !isNavigatingHistory) {
         addToHistory();
+        // Update base colors for vibe check whenever we commit a new state
+        state.baseColors = { ...state.colors };
     }
     updatePreview();
     updateOutputs();
@@ -248,6 +377,7 @@ function updateUI() {
     updateHistoryButtons();
     updateTabs();
     updateGradient();
+    updateFontUI();
 }
 
 function renderSwatches() {
@@ -282,6 +412,9 @@ function renderSwatches() {
         input.value = value;
         input.addEventListener('input', (e) => {
             state.colors[key] = e.target.value;
+            // Update base color too so vibe check doesn't revert it
+            if(state.baseColors) state.baseColors[key] = e.target.value;
+            
             updatePreview();
             updateHash();
             checkContrast();
@@ -298,6 +431,22 @@ function renderSwatches() {
         swatch.appendChild(controls);
         container.appendChild(swatch);
     }
+}
+
+function updateFontUI() {
+    headingFontName.innerText = state.fonts.headingFont;
+    bodyFontName.innerText = state.fonts.bodyFont;
+    
+    lockHeadingBtn.innerHTML = state.locked.headingFont ? '🔒' : '🔓';
+    lockHeadingBtn.className = `lock-btn ${state.locked.headingFont ? 'locked' : ''}`;
+    
+    lockBodyBtn.innerHTML = state.locked.bodyFont ? '🔒' : '🔓';
+    lockBodyBtn.className = `lock-btn ${state.locked.bodyFont ? 'locked' : ''}`;
+}
+
+function toggleLock(key) {
+    state.locked[key] = !state.locked[key];
+    updateFontUI();
 }
 
 function updatePreview() {
@@ -456,6 +605,13 @@ function updateOutputs() {
         output += `  --heading-font: '${state.fonts.headingFont}', sans-serif;\n`;
         output += `  --body-font: '${state.fonts.bodyFont}', sans-serif;\n`;
         output += `}`;
+    } else if (state.activeTab === 'scss') {
+        output = `// Variables\n`;
+        for (const [key, value] of Object.entries(state.colors)) {
+            output += `$${key}: ${value};\n`;
+        }
+        output += `$heading-font: '${state.fonts.headingFont}', sans-serif;\n`;
+        output += `$body-font: '${state.fonts.bodyFont}', sans-serif;\n`;
     } else if (state.activeTab === 'tailwind') {
         output = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n`;
         for (const [key, value] of Object.entries(state.colors)) {
@@ -520,6 +676,63 @@ function showToast(message) {
         toast.style.transition = 'all 0.3s ease';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+// Brand Card Export
+function downloadBrandCard() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = state.colors.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Title
+    ctx.fillStyle = state.colors.text;
+    ctx.font = `bold 40px sans-serif`;
+    ctx.fillText("Brand Theme", 50, 80);
+
+    // Fonts
+    ctx.font = `24px sans-serif`;
+    ctx.fillText(`Heading: ${state.fonts.headingFont}`, 50, 140);
+    ctx.fillText(`Body: ${state.fonts.bodyFont}`, 50, 180);
+
+    // Swatches
+    const colors = Object.entries(state.colors);
+    const swatchWidth = 100;
+    const swatchHeight = 100;
+    const startX = 50;
+    const startY = 250;
+
+    colors.forEach((color, index) => {
+        const [name, hex] = color;
+        const x = startX + (index % 3) * 220;
+        const y = startY + Math.floor(index / 3) * 150;
+
+        // Swatch Rect
+        ctx.fillStyle = hex;
+        ctx.fillRect(x, y, swatchWidth, swatchHeight);
+        
+        // Label
+        ctx.fillStyle = state.colors.text;
+        ctx.font = "16px sans-serif";
+        ctx.fillText(name, x, y + swatchHeight + 25);
+        ctx.fillText(hex, x, y + swatchHeight + 45);
+    });
+
+    // Footer
+    ctx.fillStyle = state.colors.text;
+    ctx.font = "14px sans-serif";
+    ctx.globalAlpha = 0.5;
+    ctx.fillText("Generated by ThemeGen", 50, 550);
+
+    // Download
+    const link = document.createElement('a');
+    link.download = 'brand-card.png';
+    link.href = canvas.toDataURL();
+    link.click();
 }
 
 // History
@@ -622,6 +835,12 @@ function renderSavedThemes() {
 function loadTheme(theme) {
     state.colors = { ...theme.colors };
     state.fonts = { ...theme.fonts };
+    // Reset vibe
+    state.vibe.saturation = 0;
+    state.vibe.brightness = 0;
+    satSlider.value = 0;
+    brightSlider.value = 0;
+    
     updateUI();
     showToast('Theme loaded!');
 }

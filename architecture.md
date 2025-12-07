@@ -36,11 +36,15 @@ The app supports multiple generation modes:
 
 Color logic uses HSL math for relationships and converts to Hex for output. Users can **Lock** specific colors to prevent them from changing during generation.
 
+**Vibe Sliders** allow real-time adjustment of Saturation and Brightness for the entire palette.
+
 ### Export System
 The output panel supports multiple formats:
 - **JSON**: Raw data for LLMs.
 - **CSS**: `:root` variables.
+- **SCSS**: SASS variables.
 - **Tailwind**: Configuration object.
+- **Brand Card**: Downloadable PNG image via Canvas API.
 
 ### Keyboard Shortcuts
 - `Space`: Generate new theme.
@@ -52,7 +56,7 @@ The output panel supports multiple formats:
 A custom Toast notification system replaces browser alerts for non-intrusive feedback.
 
 ### Font Pairing
-Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`.
+Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`. Users can **Lock** fonts independently.
 
 ### Preview System
 The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that are updated in real-time by JavaScript. It supports multiple layouts:
@@ -60,6 +64,8 @@ The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that a
 - **Dashboard**: Sidebar + data widgets.
 - **Blog**: Typography focused.
 - **E-commerce**: Product grid.
+
+**Smooth Transitions** are applied to CSS variables for a polished feel when changing themes.
 
 ### Accessibility Tools
 - **Contrast Checker**: WCAG ratio calculation.

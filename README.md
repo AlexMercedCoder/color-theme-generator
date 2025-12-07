@@ -4,8 +4,10 @@ A single-page web application that generates random website themes (color palett
 
 ## Features
 - **Smart Color Generation**: Choose from Random, Monochromatic, Complementary, or Triadic algorithms.
-- **Lock Colors**: Keep your favorite colors while regenerating the rest.
-- **Multi-Format Export**: Get your theme in JSON, CSS Variables, or Tailwind Config.
+- **Lock Colors & Fonts**: Keep your favorite colors and fonts while regenerating the rest.
+- **Vibe Check**: Real-time Saturation and Brightness sliders to adjust the whole palette.
+- **Multi-Format Export**: Get your theme in JSON, CSS Variables, SCSS, or Tailwind Config.
+- **Brand Card**: Download a professional PNG image of your theme for sharing.
 - **Live Preview**: See your theme applied instantly to a realistic mini-webpage.
 - **Multiple Layouts**: Preview on Landing Page, Dashboard, Blog, or E-commerce layouts.
 - **Manual Tweaking**: Fine-tune individual colors with pickers.
@@ -23,11 +25,13 @@ A single-page web application that generates random website themes (color palett
 1. Open `index.html` in your browser.
 2. Select a **Palette Mode** (or leave as Random).
 3. Click **Generate New Theme** (or press Space).
-4. **Lock** any colors you like by clicking the lock icon.
-5. Switch **Preview Layouts** to see how it looks in different contexts.
-6. Use the **Vision Simulator** to ensure accessibility.
-7. Click **Save Current Theme** to keep it for later.
-8. Select your preferred output format (JSON/CSS/Tailwind) and copy.
+4. **Lock** any colors or fonts you like.
+5. Use **Vibe Sliders** to adjust saturation and brightness.
+6. Switch **Preview Layouts** to see how it looks in different contexts.
+7. Use the **Vision Simulator** to ensure accessibility.
+8. Click **Save Current Theme** to keep it for later.
+9. Click **Download Brand Card** to share your theme.
+10. Select your preferred output format (JSON/CSS/SCSS/Tailwind) and copy.
 
 ## Installation
 No installation required! This is a static site.

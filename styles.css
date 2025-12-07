@@ -552,6 +552,55 @@ body.dark-mode .preview-controls {
     padding: 1rem;
 }
 
+.product-info {
+    padding: 1rem;
+}
+
+/* --- Phase 4 Styles --- */
+
+/* Smooth Transitions */
+:root {
+    transition: --primary 0.3s ease, --secondary 0.3s ease, --accent 0.3s ease, --background 0.3s ease, --surface 0.3s ease, --text 0.3s ease;
+}
+
+#preview-frame * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Vibe Sliders */
+.slider-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.slider-group input[type="range"] {
+    width: 60%;
+}
+
+/* Typography Controls */
+.font-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.font-display {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0f0f0;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+body.dark-mode .font-display {
+    background: #3d3d3d;
+}
+
 @media (max-width: 1024px) {
     main {
         grid-template-columns: 1fr;
