@@ -34,7 +34,9 @@ let state = {
     fonts: {
         headingFont: "Roboto",
         bodyFont: "Open Sans"
-    }
+    },
+    locked: {}, // Stores locked colors
+    activeTab: 'json'
 };
 
 let history = [];
@@ -43,16 +45,17 @@ let isNavigatingHistory = false;
 
 // DOM Elements
 const previewFrame = document.getElementById('preview-frame');
-const jsonOutput = document.getElementById('json-output');
+const codeOutput = document.getElementById('code-output');
 const promptOutput = document.getElementById('prompt-output');
 const shareLinkInput = document.getElementById('share-link');
 const generateBtn = document.getElementById('generate-btn');
-const copyJsonBtn = document.getElementById('copy-json-btn');
+const copyCodeBtn = document.getElementById('copy-code-btn');
 const copyPromptBtn = document.getElementById('copy-prompt-btn');
 const copyLinkBtn = document.getElementById('copy-link-btn');
 const undoBtn = document.getElementById('undo-btn');
 const redoBtn = document.getElementById('redo-btn');
 const contrastBadge = document.getElementById('contrast-badge');
+const tabBtns = document.querySelectorAll('.tab-btn');
 
 // Initialization
 function init() {
@@ -66,11 +69,37 @@ function init() {
 
 function setupEventListeners() {
     generateBtn.addEventListener('click', () => generateTheme());
-    copyJsonBtn.addEventListener('click', () => copyToClipboard(jsonOutput.value));
+    copyCodeBtn.addEventListener('click', () => copyToClipboard(codeOutput.value));
     copyPromptBtn.addEventListener('click', () => copyToClipboard(promptOutput.value));
     copyLinkBtn.addEventListener('click', () => copyToClipboard(shareLinkInput.value));
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            state.activeTab = e.target.dataset.tab;
+            updateTabs();
+            updateOutputs();
+        });
+    });
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (e.code === 'Space') {
+            e.preventDefault();
+            generateTheme();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+            e.preventDefault();
+            undo();
+        } else if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+            e.preventDefault();
+            redo();
+        } else if (e.key === 'c') {
+            copyToClipboard(codeOutput.value);
+        }
+    });
 }
 
 // Core Logic
@@ -104,7 +133,12 @@ function generateColors(mode = 'random') {
             break;
     }
 
-    state.colors = palette;
+    // Apply only to unlocked colors
+    for (const key in palette) {
+        if (!state.locked[key]) {
+            state.colors[key] = palette[key];
+        }
+    }
 }
 
 function generateRandomPalette() {
@@ -186,6 +220,7 @@ function updateUI() {
     updateHash();
     checkContrast();
     updateHistoryButtons();
+    updateTabs();
 }
 
 function renderSwatches() {
@@ -200,42 +235,51 @@ function renderSwatches() {
         const label = document.createElement('span');
         label.innerText = key;
         
+        const controls = document.createElement('div');
+        controls.style.display = 'flex';
+        controls.style.alignItems = 'center';
+        controls.style.gap = '0.5rem';
+
+        // Lock Button
+        const lockBtn = document.createElement('button');
+        lockBtn.className = `lock-btn ${state.locked[key] ? 'locked' : ''}`;
+        lockBtn.innerHTML = state.locked[key] ? '🔒' : '🔓';
+        lockBtn.title = state.locked[key] ? 'Unlock Color' : 'Lock Color';
+        lockBtn.onclick = () => {
+            state.locked[key] = !state.locked[key];
+            renderSwatches(); // Re-render to update icon
+        };
+
         const input = document.createElement('input');
         input.type = 'color';
         input.value = value;
         input.addEventListener('input', (e) => {
             state.colors[key] = e.target.value;
-            // Don't add to history on every drag, maybe debounce or just update preview
-            // For simplicity, just update preview and hash, add to history on change (blur)
             updatePreview();
             updateHash();
             checkContrast();
         });
         input.addEventListener('change', () => {
-             addToHistory(); // Add to history when user finishes picking
+             addToHistory();
              updateOutputs();
         });
 
+        controls.appendChild(lockBtn);
+        controls.appendChild(input);
         swatch.appendChild(label);
-        swatch.appendChild(input);
+        swatch.appendChild(controls);
         container.appendChild(swatch);
     }
 }
 
 function updatePreview() {
-    // Update CSS Variables in the Preview
     const root = document.documentElement;
-    root.style.setProperty('--primary', state.colors.primary);
-    root.style.setProperty('--secondary', state.colors.secondary);
-    root.style.setProperty('--accent', state.colors.accent);
-    root.style.setProperty('--background', state.colors.background);
-    root.style.setProperty('--surface', state.colors.surface);
-    root.style.setProperty('--text', state.colors.text);
-    
+    for (const [key, value] of Object.entries(state.colors)) {
+        root.style.setProperty(`--${key}`, value);
+    }
     root.style.setProperty('--heading-font', state.fonts.headingFont);
     root.style.setProperty('--body-font', state.fonts.bodyFont);
 
-    // Load Fonts
     loadFonts([state.fonts.headingFont, state.fonts.bodyFont]);
 }
 
@@ -253,9 +297,41 @@ function loadFonts(fonts) {
     link.href = `https://fonts.googleapis.com/css?family=${fontQuery}&display=swap`;
 }
 
+function updateTabs() {
+    tabBtns.forEach(btn => {
+        if (btn.dataset.tab === state.activeTab) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
 function updateOutputs() {
-    const json = JSON.stringify(state, null, 2);
-    jsonOutput.value = json;
+    let output = '';
+    
+    if (state.activeTab === 'json') {
+        output = JSON.stringify(state.colors, null, 2);
+    } else if (state.activeTab === 'css') {
+        output = `:root {\n`;
+        for (const [key, value] of Object.entries(state.colors)) {
+            output += `  --${key}: ${value};\n`;
+        }
+        output += `  --heading-font: '${state.fonts.headingFont}', sans-serif;\n`;
+        output += `  --body-font: '${state.fonts.bodyFont}', sans-serif;\n`;
+        output += `}`;
+    } else if (state.activeTab === 'tailwind') {
+        output = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n`;
+        for (const [key, value] of Object.entries(state.colors)) {
+            output += `        ${key}: '${value}',\n`;
+        }
+        output += `      },\n      fontFamily: {\n`;
+        output += `        heading: ['${state.fonts.headingFont}', 'sans-serif'],\n`;
+        output += `        body: ['${state.fonts.bodyFont}', 'sans-serif'],\n`;
+        output += `      }\n    }\n  }\n}`;
+    }
+
+    codeOutput.value = output;
 
     const prompt = `Build a responsive website using this theme. Follow these design guidelines:
 
@@ -284,16 +360,32 @@ Return clean semantic HTML, modern CSS, and sample content.`;
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        alert('Copied to clipboard!');
+        showToast('Copied to clipboard!');
     });
+}
+
+function showToast(message) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = message;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(100%)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
 // History
 function addToHistory() {
-    // Remove future history if we were in the middle
     if (historyIndex < history.length - 1) {
         history = history.slice(0, historyIndex + 1);
     }
+    // Deep copy state including locks
     history.push(JSON.parse(JSON.stringify(state)));
     historyIndex++;
     updateHistoryButtons();

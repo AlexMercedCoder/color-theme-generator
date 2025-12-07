@@ -81,9 +81,13 @@
             <h2>Output</h2>
             
             <div class="control-group">
-                <label>JSON Data</label>
-                <textarea id="json-output" readonly></textarea>
-                <button id="copy-json-btn" class="secondary-btn">Copy JSON</button>
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="json">JSON</button>
+                    <button class="tab-btn" data-tab="css">CSS</button>
+                    <button class="tab-btn" data-tab="tailwind">Tailwind</button>
+                </div>
+                <textarea id="code-output" readonly></textarea>
+                <button id="copy-code-btn" class="secondary-btn">Copy Code</button>
             </div>
 
             <div class="control-group">
@@ -103,6 +107,8 @@
     <footer>
         Created by <a href="https://alexmerced.com" target="_blank">AlexMerced</a>
     </footer>
+
+    <div id="toast-container"></div>
 
     <script src="script.js"></script>
 </body>

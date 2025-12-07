@@ -34,7 +34,22 @@ The app supports multiple generation modes:
 - **Complementary**: Base hue + opposite hue (180deg).
 - **Triadic**: Three hues spaced 120deg apart.
 
-Color logic uses HSL math for relationships and converts to Hex for output.
+Color logic uses HSL math for relationships and converts to Hex for output. Users can **Lock** specific colors to prevent them from changing during generation.
+
+### Export System
+The output panel supports multiple formats:
+- **JSON**: Raw data for LLMs.
+- **CSS**: `:root` variables.
+- **Tailwind**: Configuration object.
+
+### Keyboard Shortcuts
+- `Space`: Generate new theme.
+- `Ctrl/Cmd + Z`: Undo.
+- `Ctrl/Cmd + Y`: Redo.
+- `C`: Copy current code output.
+
+### Notifications
+A custom Toast notification system replaces browser alerts for non-intrusive feedback.
 
 ### Font Pairing
 Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`.
