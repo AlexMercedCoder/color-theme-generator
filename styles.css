@@ -829,3 +829,23 @@ body.dark-mode .tour-box {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
 }
+
+/* Mobile Nav Fix */
+@media (max-width: 600px) {
+    header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+    }
+
+    .header-left {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .header-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+}

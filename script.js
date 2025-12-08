@@ -49,47 +49,74 @@ let state = {
 let history = [];
 let historyIndex = -1;
 let isNavigatingHistory = false;
-let savedThemes = JSON.parse(localStorage.getItem('savedThemes')) || [];
+let savedThemes = [];
+try {
+    savedThemes = JSON.parse(localStorage.getItem('savedThemes')) || [];
+} catch (e) {
+    console.warn('LocalStorage not available:', e);
+}
 
 // DOM Elements
-const previewFrame = document.getElementById('preview-frame');
-const codeOutput = document.getElementById('code-output');
-const promptOutput = document.getElementById('prompt-output');
-const gradientOutput = document.getElementById('gradient-output');
-const gradientPreview = document.getElementById('gradient-preview');
-const shareLinkInput = document.getElementById('share-link');
-const generateBtn = document.getElementById('generate-btn');
-const saveThemeBtn = document.getElementById('save-theme-btn');
-const downloadBrandCardBtn = document.getElementById('download-brand-card-btn');
-const copyCodeBtn = document.getElementById('copy-code-btn');
-const copyPromptBtn = document.getElementById('copy-prompt-btn');
-const copyGradientBtn = document.getElementById('copy-gradient-btn');
-const copyLinkBtn = document.getElementById('copy-link-btn');
-const undoBtn = document.getElementById('undo-btn');
-const redoBtn = document.getElementById('redo-btn');
-const themeToggleBtn = document.getElementById('theme-toggle');
-const contrastBadge = document.getElementById('contrast-badge');
-const tabBtns = document.querySelectorAll('.tab-btn');
-const previewLayoutSelect = document.getElementById('preview-layout');
-const visionSimulatorSelect = document.getElementById('vision-simulator');
-const savedThemesList = document.getElementById('saved-themes-list');
-const satSlider = document.getElementById('sat-slider');
-const brightSlider = document.getElementById('bright-slider');
-const lockHeadingBtn = document.getElementById('lock-heading-btn');
-const lockBodyBtn = document.getElementById('lock-body-btn');
-const headingFontName = document.getElementById('heading-font-name');
-const bodyFontName = document.getElementById('body-font-name');
+// DOM Elements
+let previewFrame, codeOutput, promptOutput, gradientOutput, gradientPreview, shareLinkInput;
+let generateBtn, saveThemeBtn, downloadBrandCardBtn, copyCodeBtn, copyPromptBtn, copyGradientBtn, copyLinkBtn;
+let undoBtn, redoBtn, themeToggleBtn, contrastBadge, tabBtns, previewLayoutSelect, visionSimulatorSelect;
+let savedThemesList, satSlider, brightSlider, lockHeadingBtn, lockBodyBtn, headingFontName, bodyFontName;
+let tourBtn, tourNextBtn, tourSkipBtn, fixContrastBtn, zenModeBtn, imageUpload, magicKeyword, typeScale;
 
 // Initialization
+// Initialization
 function init() {
+    initializeGlobals();
     if (window.location.hash) {
         loadFromHash();
+        updateUI(); // Fix: Ensure UI updates when loading from hash
     } else {
         generateTheme();
     }
     renderSavedThemes();
     setupEventListeners();
     updateFontUI();
+}
+
+function initializeGlobals() {
+    previewFrame = document.getElementById('preview-frame');
+    codeOutput = document.getElementById('code-output');
+    promptOutput = document.getElementById('prompt-output');
+    gradientOutput = document.getElementById('gradient-output');
+    gradientPreview = document.getElementById('gradient-preview');
+    shareLinkInput = document.getElementById('share-link');
+    generateBtn = document.getElementById('generate-btn');
+    saveThemeBtn = document.getElementById('save-theme-btn');
+    downloadBrandCardBtn = document.getElementById('download-brand-card-btn');
+    copyCodeBtn = document.getElementById('copy-code-btn');
+    copyPromptBtn = document.getElementById('copy-prompt-btn');
+    copyGradientBtn = document.getElementById('copy-gradient-btn');
+    copyLinkBtn = document.getElementById('copy-link-btn');
+    undoBtn = document.getElementById('undo-btn');
+    redoBtn = document.getElementById('redo-btn');
+    themeToggleBtn = document.getElementById('theme-toggle');
+    contrastBadge = document.getElementById('contrast-badge');
+    tabBtns = document.querySelectorAll('.tab-btn');
+    previewLayoutSelect = document.getElementById('preview-layout');
+    visionSimulatorSelect = document.getElementById('vision-simulator');
+    savedThemesList = document.getElementById('saved-themes-list');
+    satSlider = document.getElementById('sat-slider');
+    brightSlider = document.getElementById('bright-slider');
+    lockHeadingBtn = document.getElementById('lock-heading-btn');
+    lockBodyBtn = document.getElementById('lock-body-btn');
+    headingFontName = document.getElementById('heading-font-name');
+    bodyFontName = document.getElementById('body-font-name');
+    
+    // New elements
+    tourBtn = document.getElementById('tour-btn');
+    tourNextBtn = document.getElementById('tour-next');
+    tourSkipBtn = document.getElementById('tour-skip');
+    fixContrastBtn = document.getElementById('fix-contrast-btn');
+    zenModeBtn = document.getElementById('zen-mode-btn');
+    imageUpload = document.getElementById('image-upload');
+    magicKeyword = document.getElementById('magic-keyword');
+    typeScale = document.getElementById('type-scale');
 }
 
 function setupEventListeners() {
@@ -136,18 +163,18 @@ function setupEventListeners() {
     lockBodyBtn.addEventListener('click', () => toggleLock('bodyFont'));
 
     // Phase 5 Listeners
-    document.getElementById('image-upload').addEventListener('change', handleImageUpload);
-    document.getElementById('type-scale').addEventListener('change', updateTypeScale);
-    document.getElementById('zen-mode-btn').addEventListener('click', toggleZenMode);
+    imageUpload.addEventListener('change', handleImageUpload);
+    typeScale.addEventListener('change', updateTypeScale);
+    zenModeBtn.addEventListener('click', toggleZenMode);
     
     // Phase 6 Listeners
-    document.getElementById('magic-keyword').addEventListener('change', generateFromKeyword);
+    magicKeyword.addEventListener('change', generateFromKeyword);
 
     // Phase 7 Listeners
-    document.getElementById('tour-btn').addEventListener('click', startTour);
-    document.getElementById('tour-next').addEventListener('click', nextTourStep);
-    document.getElementById('tour-skip').addEventListener('click', endTour);
-    document.getElementById('fix-contrast-btn').addEventListener('click', fixContrast);
+    tourBtn.addEventListener('click', startTour);
+    tourNextBtn.addEventListener('click', nextTourStep);
+    tourSkipBtn.addEventListener('click', endTour);
+    fixContrastBtn.addEventListener('click', fixContrast);
 
     setupSnippetInteractions();
     renderPreviewLayout(); // Fix: Ensure preview is rendered on load
@@ -387,10 +414,10 @@ function updateUI(skipHistory = false) {
         state.baseColors = { ...state.colors };
     }
     updatePreview();
-    updateOutputs();
+    updateOutputs(); // Consolidated function
     renderSwatches();
     updatePreview();
-    updateCodeOutput();
+    // updateCodeOutput(); // Removed duplicate call
     updateHistoryButtons();
     updateThemeName(); // Phase 7
 
@@ -410,9 +437,9 @@ function updateUI(skipHistory = false) {
         badge.className = 'badge fail';
         fixBtn.style.display = 'inline-block';
     }
-    updateHash();
+    // updateHash(); // Moved to updateOutputs
     updateTabs();
-    updateGradient();
+    // updateGradient(); // Moved to updateOutputs
     updateFontUI();
 }
 
@@ -608,7 +635,33 @@ function updateVisionFilter() {
     }
 }
 
-function updateCodeOutput() {
+
+function loadFonts(fonts) {
+    const linkId = 'dynamic-fonts';
+    let link = document.getElementById(linkId);
+    if (!link) {
+        link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        document.head.appendChild(link);
+    }
+    
+    const fontQuery = fonts.map(f => f.replace(/ /g, '+')).join('|');
+    link.href = `https://fonts.googleapis.com/css?family=${fontQuery}&display=swap`;
+}
+
+function updateTabs() {
+    tabBtns.forEach(btn => {
+        if (btn.dataset.tab === state.activeTab) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+function updateOutputs() {
+    // 1. Update Code Output
     const output = document.getElementById('code-output');
     const tab = state.activeTab;
 
@@ -646,7 +699,6 @@ ${Object.entries(state.colors).map(([k, v]) => `        ${k}: '${v}'`).join(',\n
   }
 }`;
     } else if (tab === 'tokens') {
-        // Design Tokens (W3C format draft approximation)
         const tokens = {
             color: {},
             font: {
@@ -661,78 +713,8 @@ ${Object.entries(state.colors).map(([k, v]) => `        ${k}: '${v}'`).join(',\n
         }
         output.value = JSON.stringify(tokens, null, 4);
     }
-}
-function loadFonts(fonts) {
-    const linkId = 'dynamic-fonts';
-    let link = document.getElementById(linkId);
-    if (!link) {
-        link = document.createElement('link');
-        link.id = linkId;
-        link.rel = 'stylesheet';
-        document.head.appendChild(link);
-    }
-    
-    const fontQuery = fonts.map(f => f.replace(/ /g, '+')).join('|');
-    link.href = `https://fonts.googleapis.com/css?family=${fontQuery}&display=swap`;
-}
 
-function updateTabs() {
-    tabBtns.forEach(btn => {
-        if (btn.dataset.tab === state.activeTab) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
-}
-
-function updateOutputs() {
-    let output = '';
-    
-    if (state.activeTab === 'json') {
-        output = JSON.stringify(state.colors, null, 2);
-    } else if (state.activeTab === 'css') {
-        output = `:root {\n`;
-        for (const [key, value] of Object.entries(state.colors)) {
-            output += `  --${key}: ${value};\n`;
-        }
-        output += `  --heading-font: '${state.fonts.headingFont}', sans-serif;\n`;
-        output += `  --body-font: '${state.fonts.bodyFont}', sans-serif;\n`;
-        output += `}`;
-    } else if (state.activeTab === 'scss') {
-        output = `// Variables\n`;
-        for (const [key, value] of Object.entries(state.colors)) {
-            output += `$${key}: ${value};\n`;
-        }
-        output += `$heading-font: '${state.fonts.headingFont}', sans-serif;\n`;
-        output += `$body-font: '${state.fonts.bodyFont}', sans-serif;\n`;
-    } else if (state.activeTab === 'tailwind') {
-        output = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: {\n`;
-        for (const [key, value] of Object.entries(state.colors)) {
-            output += `        ${key}: '${value}',\n`;
-        }
-        output += `      },\n      fontFamily: {\n`;
-        output += `        heading: ['${state.fonts.headingFont}', 'sans-serif'],\n`;
-        output += `        body: ['${state.fonts.bodyFont}', 'sans-serif'],\n`;
-        output += `      }\n    }\n  }\n}`;
-    } else if (state.activeTab === 'tokens') {
-        const tokens = {
-            color: {},
-            font: {
-                family: {
-                    heading: { value: state.fonts.headingFont },
-                    body: { value: state.fonts.bodyFont }
-                }
-            }
-        };
-        for (const [key, value] of Object.entries(state.colors)) {
-            tokens.color[key] = { value: value };
-        }
-        output = JSON.stringify(tokens, null, 2);
-    }
-
-    codeOutput.value = output;
-
+    // 2. Update Prompt Output
     const prompt = `Build a responsive website using this theme. Follow these design guidelines:
 
 Color Palette:
@@ -755,7 +737,13 @@ Requirements:
 - Use the surface color for cards and UI containers.
 
 Return clean semantic HTML, modern CSS, and sample content.`;
-    promptOutput.value = prompt;
+    document.getElementById('prompt-output').value = prompt;
+
+    // 3. Update Gradient Output
+    updateGradient();
+
+    // 4. Update Hash/Share Link
+    updateHash();
 }
 
 function updateGradient() {
@@ -971,7 +959,12 @@ function toggleDarkMode() {
 // Zen Mode
 function toggleZenMode() {
     document.body.classList.toggle('zen-mode');
+    const isZen = document.body.classList.contains('zen-mode');
+    document.getElementById('exit-zen-btn').style.display = isZen ? 'block' : 'none';
 }
+
+// Add listener for exit button
+document.getElementById('exit-zen-btn').addEventListener('click', toggleZenMode);
 
 // Type Scale
 function updateTypeScale() {
@@ -1252,12 +1245,20 @@ function generateFromKeyword() {
     showToast(`Theme generated for "${keyword}"!`);
 }
 
-// Service Worker Registration
+// PWA Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('Service Worker Registered'))
-            .catch(err => console.log('Service Worker Error:', err));
+        try {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                })
+                .catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+        } catch (e) {
+            console.warn('ServiceWorker not supported in this context:', e);
+        }
     });
 }
 
@@ -1265,9 +1266,9 @@ if ('serviceWorker' in navigator) {
 function generateThemeName(colors) {
     const primary = colors.primary;
     const hsl = hexToHsl(primary);
-    const h = hsl[0];
-    const s = hsl[1];
-    const l = hsl[2];
+    const h = hsl.h;
+    const s = hsl.s;
+    const l = hsl.l;
 
     let hueName = '';
     if (h >= 350 || h < 10) hueName = 'Red';
@@ -1312,7 +1313,7 @@ function fixContrast() {
 
     // Iteratively adjust lightness
     let hsl = hexToHsl(text);
-    let l = hsl[2];
+    let l = hsl.l;
     const bgL = getLuminance(bg);
     
     // If bg is dark, lighten text. If bg is light, darken text.
@@ -1323,7 +1324,7 @@ function fixContrast() {
         if (l < 0) l = 0;
         if (l > 100) l = 100;
         
-        const newHex = hslToHex(hsl[0], hsl[1], l);
+        const newHex = hslToHex(hsl.h, hsl.s, l);
         if (checkContrast(bg, newHex) >= 4.5) {
             state.colors.text = newHex;
             updateUI();
@@ -1362,6 +1363,7 @@ function showTourStep() {
 
     // Position box
     const box = document.getElementById('tour-box');
+    box.style.display = 'block'; // Fix: Ensure box is visible
     const rect = el ? el.getBoundingClientRect() : { top: 100, left: 100, height: 0 };
     
     // Simple positioning logic (can be improved)
@@ -1389,40 +1391,21 @@ function nextTourStep() {
 
 function endTour() {
     document.getElementById('tour-overlay').style.display = 'none';
+    document.getElementById('tour-box').style.display = 'none'; // Fix: Hide box
     document.querySelectorAll('.tour-highlight').forEach(e => e.classList.remove('tour-highlight'));
 }
 
-// Helper: Hex to HSL (needed for naming and contrast fix)
-function hexToHsl(hex) {
-    let r = 0, g = 0, b = 0;
-    if (hex.length === 4) {
-        r = "0x" + hex[1] + hex[1];
-        g = "0x" + hex[2] + hex[2];
-        b = "0x" + hex[3] + hex[3];
-    } else if (hex.length === 7) {
-        r = "0x" + hex[1] + hex[2];
-        g = "0x" + hex[3] + hex[4];
-        b = "0x" + hex[5] + hex[6];
-    }
-    r /= 255; g /= 255; b /= 255;
-    let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin;
-    let h = 0, s = 0, l = 0;
 
-    if (delta === 0) h = 0;
-    else if (cmax === r) h = ((g - b) / delta) % 6;
-    else if (cmax === g) h = (b - r) / delta + 2;
-    else h = (r - g) / delta + 4;
 
-    h = Math.round(h * 60);
-    if (h < 0) h += 360;
-
-    l = (cmax + cmin) / 2;
-    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-    s = +(s * 100).toFixed(1);
-    l = +(l * 100).toFixed(1);
-
-    return [h, s, l];
-}
+// Global Error Handler for debugging
+window.onerror = function(msg, url, line, col, error) {
+    // alert(`Error: ${msg}\nLine: ${line}`); // Uncomment if needed for user feedback
+    console.error('Global Error:', msg, error);
+};
 
 // Start
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
