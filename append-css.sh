@@ -1,0 +1,89 @@
+#!/bin/bash
+# Append improved CSS to styles.css
+
+cat >> /Users/alexmerced/development/2026/color-theme-generator/styles.css << 'EOFCSS'
+
+/* === Improved New Preview Layouts === */
+
+/* Components Gallery */
+.layout-components { padding: 2rem; display: flex; flex-direction: column; gap: 2rem; background: var(--background); }
+.component-showcase { background: var(--surface); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
+.component-showcase:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.component-showcase h4 { font-family: var(--heading-font); color: var(--primary); margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600; }
+.button-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+.alert-box { padding: 1.25rem; border-radius: 8px; border-left: 4px solid var(--accent); background: var(--surface); margin-top: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.badge-demo { display: inline-block; padding: 0.35rem 0.9rem; border-radius: 16px; background: var(--primary); color: white; font-size: 0.875rem; font-weight: 500; margin: 0.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+.form-demo { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+.form-demo input { padding: 0.75rem 1rem; border: 2px solid var(--accent); border-radius: 8px; background: var(--background); color: var(--text); font-size: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.form-demo input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+
+/* Admin Panel */
+.layout-admin { display: grid; grid-template-columns: 260px 1fr; min-height: 100%; background: var(--background); }
+.admin-sidebar { background: var(--primary); color: white; padding: 2rem 1.5rem; box-shadow: 2px 0 8px rgba(0,0,0,0.1); }
+.admin-sidebar h3 { font-family: var(--heading-font); margin-bottom: 2rem; font-size: 1.5rem; font-weight: 700; }
+.admin-nav { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.admin-nav li { padding: 0.875rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+.admin-nav li:hover { background: rgba(255,255,255,0.15); transform: translateX(4px); }
+.admin-main { padding: 2.5rem; background: var(--background); }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--surface); }
+.admin-header h2 { font-family: var(--heading-font); color: var(--text); font-size: 2rem; font-weight: 700; }
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+.stat-card { background: var(--surface); padding: 2rem; border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.stat-card h4 { color: var(--accent); font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.75rem; }
+.stat-card .stat-value { font-size: 2.5rem; font-weight: 700; color: var(--primary); line-height: 1; }
+.data-table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.data-table th { background: var(--primary); color: white; padding: 1.25rem 1.5rem; text-align: left; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.data-table td { padding: 1.25rem 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.95rem; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover { background: rgba(0,0,0,0.02); }
+
+/* Marketing Page */
+.layout-marketing { display: flex; flex-direction: column; }
+.marketing-hero { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 5rem 2rem; text-align: center; position: relative; overflow: hidden; }
+.marketing-hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1), transparent); pointer-events: none; }
+.marketing-hero h1 { font-family: var(--heading-font); font-size: 3.5rem; margin-bottom: 1.5rem; font-weight: 800; line-height: 1.1; position: relative; }
+.marketing-hero p { font-size: 1.35rem; margin-bottom: 2.5rem; opacity: 0.95; max-width: 600px; margin-left: auto; margin-right: auto; position: relative; }
+.cta-buttons { display: flex; gap: 1.25rem; justify-content: center; position: relative; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem; padding: 4rem 2.5rem; background: var(--background); }
+.feature-card { text-align: center; padding: 2.5rem; background: var(--surface); border-radius: 16px; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: transform 0.3s, box-shadow 0.3s; }
+.feature-card:hover { transform: translateY(-8px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.feature-icon { width: 70px; height: 70px; background: var(--accent); border-radius: 50%; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 2.25rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.feature-card h3 { font-family: var(--heading-font); color: var(--primary); margin-bottom: 1rem; font-size: 1.5rem; font-weight: 700; }
+.feature-card p { color: var(--text); opacity: 0.8; line-height: 1.6; }
+.testimonials { background: var(--surface); padding: 4rem 2.5rem; }
+.testimonials h2 { font-family: var(--heading-font); text-align: center; color: var(--primary); margin-bottom: 3rem; font-size: 2.5rem; font-weight: 700; }
+.testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; max-width: 1200px; margin: 0 auto; }
+.testimonial-card { background: var(--background); padding: 2rem; border-radius: 12px; border-left: 4px solid var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+.testimonial-card:hover { transform: translateY(-4px); box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+.testimonial-card p { font-style: italic; margin-bottom: 1.25rem; line-height: 1.7; font-size: 1.05rem; color: var(--text); }
+.testimonial-author { font-weight: 600; color: var(--primary); font-size: 0.95rem; }
+
+/* App Interface */
+.layout-app { display: flex; flex-direction: column; min-height: 100%; }
+.app-header { background: var(--primary); color: white; padding: 1.25rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); position: relative; z-index: 10; }
+.app-header h3 { font-family: var(--heading-font); font-size: 1.5rem; font-weight: 700; }
+.app-header-actions { display: flex; gap: 0.75rem; }
+.app-body { display: flex; flex: 1; }
+.app-sidebar { width: 240px; background: var(--surface); border-right: 1px solid rgba(0,0,0,0.08); padding: 1.5rem; box-shadow: 2px 0 8px rgba(0,0,0,0.02); }
+.app-sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.app-sidebar li { padding: 0.875rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s; font-weight: 500; }
+.app-sidebar li:hover { background: rgba(0,0,0,0.04); transform: translateX(4px); }
+.app-sidebar li.active { background: var(--primary); color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+.app-content { flex: 1; padding: 2.5rem; background: var(--background); }
+.app-content h2 { font-family: var(--heading-font); color: var(--primary); margin-bottom: 2rem; font-size: 2rem; font-weight: 700; }
+.app-card { background: var(--surface); padding: 2rem; border-radius: 12px; margin-bottom: 1.5rem; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
+.app-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.app-card h4 { font-family: var(--heading-font); color: var(--text); margin-bottom: 0.75rem; font-size: 1.25rem; font-weight: 600; }
+.app-card p { color: var(--text); opacity: 0.8; line-height: 1.6; margin-bottom: 1rem; }
+.app-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+
+/* Spec Modal */
+.spec-modal-content { max-width: 800px; width: 90%; }
+#spec-output { width: 100%; height: 400px; margin: 1rem 0; padding: 1rem; font-family: 'Courier New', monospace; font-size: 0.9rem; border: 1px solid #ddd; border-radius: 4px; resize: vertical; background: #f8f9fa; line-height: 1.5; }
+body.dark-mode #spec-output { background-color: #1a1a1a; color: #f0f0f0; border-color: #555; }
+.spec-modal-actions { display: flex; gap: 1rem; justify-content: flex-end; }
+.spec-modal-actions button { min-width: 150px; }
+EOFCSS
+
+echo "CSS appended successfully"

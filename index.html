@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ThemeGen - Advanced Website Theme Generator</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-new-layouts.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
 </head>
+
 <body>
 
     <header>
@@ -25,13 +28,14 @@
     </header>
 
     <!-- Zen Mode Exit Button -->
-    <button id="exit-zen-btn" class="icon-btn" title="Exit Zen Mode" style="display: none; position: fixed; top: 1rem; right: 1rem; z-index: 3000;">✕</button>
+    <button id="exit-zen-btn" class="icon-btn" title="Exit Zen Mode"
+        style="display: none; position: fixed; top: 1rem; right: 1rem; z-index: 3000;">✕</button>
 
     <main>
         <!-- Control Panel -->
         <aside class="panel control-panel">
             <h2>Controls</h2>
-            
+
             <div class="control-group">
                 <label for="palette-mode">Palette Mode</label>
                 <select id="palette-mode">
@@ -56,7 +60,7 @@
 
             <button id="generate-btn" class="primary-btn">Generate New Theme</button>
             <button id="save-theme-btn" class="secondary-btn" style="margin-top: 0.5rem;">Save Current Theme</button>
-            
+
             <div class="control-group" style="margin-top: 0.5rem;">
                 <label>Brand Card</label>
                 <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
@@ -66,9 +70,10 @@
                         <option value="post">Social Post (1080x1080)</option>
                     </select>
                 </div>
-                <button id="download-brand-card-btn" class="secondary-btn" style="width: 100%;">Download Brand Card</button>
+                <button id="download-brand-card-btn" class="secondary-btn" style="width: 100%;">Download Brand
+                    Card</button>
             </div>
-            
+
             <hr>
 
             <div class="control-group">
@@ -82,15 +87,16 @@
                     <input type="range" id="bright-slider" min="-50" max="50" value="0">
                 </div>
             </div>
-            
+
             <hr>
-            
+
             <div class="control-group">
                 <label>Current Colors</label>
                 <div class="contrast-checker">
                     <span>Contrast Ratio: <span id="contrast-ratio">--</span></span>
                     <span id="contrast-badge" class="badge">--</span>
-                    <button id="fix-contrast-btn" class="btn-small" style="display: none;" title="Auto-fix contrast">Auto-Fix</button>
+                    <button id="fix-contrast-btn" class="btn-small" style="display: none;"
+                        title="Auto-fix contrast">Auto-Fix</button>
                 </div>
                 <div id="color-swatches">
                     <!-- Swatches will go here -->
@@ -151,6 +157,10 @@
                     <option value="dashboard">Dashboard</option>
                     <option value="blog">Blog Post</option>
                     <option value="ecommerce">E-commerce</option>
+                    <option value="components">Components Gallery</option>
+                    <option value="admin">Admin Panel</option>
+                    <option value="marketing">Marketing Page</option>
+                    <option value="app">App Interface</option>
                 </select>
                 <select id="vision-simulator">
                     <option value="normal">Normal Vision</option>
@@ -160,7 +170,7 @@
                     <option value="achromatopsia">Achromatopsia (Monochromacy)</option>
                 </select>
             </div>
-            
+
             <div id="preview-frame-wrapper">
                 <div id="preview-frame" class="layout-landing">
                     <!-- Content injected by JS based on layout -->
@@ -183,7 +193,7 @@
         <!-- Output Panel -->
         <aside class="panel output-panel">
             <h2>Output</h2>
-            
+
             <div class="control-group">
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="json">JSON</button>
@@ -199,7 +209,8 @@
 
             <div class="control-group">
                 <label>CSS Gradient</label>
-                <div id="gradient-preview" style="height: 40px; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid #ddd;"></div>
+                <div id="gradient-preview"
+                    style="height: 40px; border-radius: 4px; margin-bottom: 0.5rem; border: 1px solid #ddd;"></div>
                 <textarea id="gradient-output" readonly style="height: 60px;"></textarea>
                 <button id="copy-gradient-btn" class="secondary-btn">Copy Gradient</button>
             </div>
@@ -209,15 +220,20 @@
                 <textarea id="prompt-output" readonly></textarea>
                 <button id="copy-prompt-btn" class="secondary-btn">Copy Prompt</button>
             </div>
-            
+
             <div class="control-group">
                 <label>Share Link</label>
                 <input type="text" id="share-link" readonly>
                 <button id="copy-link-btn" class="secondary-btn">Copy Link</button>
             </div>
+
+            <div class="control-group">
+                <button id="generate-spec-btn" class="primary-btn" style="width: 100%;">Generate Markdown
+                    Specsheet</button>
+            </div>
         </aside>
     </main>
-    
+
     <footer>
         Created by <a href="https://alexmerced.com" target="_blank">AlexMerced</a>
     </footer>
@@ -235,20 +251,48 @@
         </div>
     </div>
 
+    <!-- Spec Sheet Modal -->
+    <div id="spec-modal" class="modal">
+        <div class="modal-content spec-modal-content">
+            <span class="close-modal" id="close-spec-modal">&times;</span>
+            <h3>Markdown Specification Sheet</h3>
+            <p>Choose a template type and customize the spec sheet for your project.</p>
+            <div class="control-group" style="margin-bottom: 1rem;">
+                <label for="spec-type">Template Type</label>
+                <select id="spec-type">
+                    <option value="generic">Generic Website</option>
+                    <option value="marketing">Marketing One-Page</option>
+                    <option value="blog">Markdown Blog</option>
+                    <option value="linktree">Mobile Link Page</option>
+                    <option value="portfolio">Portfolio Website</option>
+                </select>
+            </div>
+            <textarea id="spec-output" readonly></textarea>
+            <div class="spec-modal-actions">
+                <button id="copy-spec-btn" class="primary-btn">Copy to Clipboard</button>
+                <button id="download-spec-btn" class="secondary-btn">Download spec-sheet.md</button>
+            </div>
+        </div>
+    </div>
+
     <!-- SVG Filters for Color Blindness -->
     <svg style="display: none;">
         <defs>
             <filter id="protanopia">
-                <feColorMatrix type="matrix" values="0.567, 0.433, 0, 0, 0  0.558, 0.442, 0, 0, 0  0, 0.242, 0.758, 0, 0  0, 0, 0, 1, 0"/>
+                <feColorMatrix type="matrix"
+                    values="0.567, 0.433, 0, 0, 0  0.558, 0.442, 0, 0, 0  0, 0.242, 0.758, 0, 0  0, 0, 0, 1, 0" />
             </filter>
             <filter id="deuteranopia">
-                <feColorMatrix type="matrix" values="0.625, 0.375, 0, 0, 0  0.7, 0.3, 0, 0, 0  0, 0.3, 0.7, 0, 0  0, 0, 0, 1, 0"/>
+                <feColorMatrix type="matrix"
+                    values="0.625, 0.375, 0, 0, 0  0.7, 0.3, 0, 0, 0  0, 0.3, 0.7, 0, 0  0, 0, 0, 1, 0" />
             </filter>
             <filter id="tritanopia">
-                <feColorMatrix type="matrix" values="0.95, 0.05, 0, 0, 0  0, 0.433, 0.567, 0, 0  0, 0.475, 0.525, 0, 0  0, 0, 0, 1, 0"/>
+                <feColorMatrix type="matrix"
+                    values="0.95, 0.05, 0, 0, 0  0, 0.433, 0.567, 0, 0  0, 0.475, 0.525, 0, 0  0, 0, 0, 1, 0" />
             </filter>
             <filter id="achromatopsia">
-                <feColorMatrix type="matrix" values="0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0, 0, 0, 1, 0"/>
+                <feColorMatrix type="matrix"
+                    values="0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0.299, 0.587, 0.114, 0, 0  0, 0, 0, 1, 0" />
             </filter>
         </defs>
     </svg>
@@ -266,4 +310,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

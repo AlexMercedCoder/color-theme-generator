@@ -114,7 +114,7 @@ function initializeGlobals() {
     lockBodyBtn = document.getElementById('lock-body-btn');
     headingFontName = document.getElementById('heading-font-name');
     bodyFontName = document.getElementById('body-font-name');
-    
+
     // New elements
     tourBtn = document.getElementById('tour-btn');
     tourNextBtn = document.getElementById('tour-next');
@@ -143,7 +143,7 @@ function setupEventListeners() {
     undoBtn.addEventListener('click', undo);
     redoBtn.addEventListener('click', redo);
     themeToggleBtn.addEventListener('click', toggleDarkMode);
-    
+
     tabBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             state.activeTab = e.target.dataset.tab;
@@ -179,7 +179,7 @@ function setupEventListeners() {
     imageUpload.addEventListener('change', handleImageUpload);
     typeScale.addEventListener('change', updateTypeScale);
     zenModeBtn.addEventListener('click', toggleZenMode);
-    
+
     // Phase 6 Listeners
     magicKeyword.addEventListener('change', generateFromKeyword);
 
@@ -189,10 +189,19 @@ function setupEventListeners() {
     tourSkipBtn.addEventListener('click', endTour);
     fixContrastBtn.addEventListener('click', fixContrast);
     exitZenBtn.addEventListener('click', toggleZenMode);
-    
+
     focusColorInput.addEventListener('input', updateFocusRing);
     focusStyleSelect.addEventListener('change', updateFocusRing);
     fontUpload.addEventListener('change', handleFontUpload);
+
+    // Spec Sheet Listeners
+    const generateSpecBtn = document.getElementById('generate-spec-btn');
+    const copySpecBtn = document.getElementById('copy-spec-btn');
+    const downloadSpecBtn = document.getElementById('download-spec-btn');
+
+    if (generateSpecBtn) generateSpecBtn.addEventListener('click', showSpecModal);
+    if (copySpecBtn) copySpecBtn.addEventListener('click', copySpecSheet);
+    if (downloadSpecBtn) downloadSpecBtn.addEventListener('click', downloadSpecSheet);
 
     setupSnippetInteractions();
     renderPreviewLayout(); // Fix: Ensure preview is rendered on load
@@ -221,7 +230,7 @@ function generateTheme() {
     const mode = document.getElementById('palette-mode').value;
     generateColors(mode);
     generateFonts();
-    
+
     // Reset vibe sliders on new generation
     state.vibe.saturation = 0;
     state.vibe.brightness = 0;
@@ -319,7 +328,7 @@ function generateFonts() {
 }
 
 function getRandomHex() {
-    return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 }
 
 function hslToHex(h, s, l) {
@@ -347,8 +356,8 @@ function hexToHsl(hex) {
     r /= 255;
     g /= 255;
     b /= 255;
-    let cmin = Math.min(r,g,b),
-        cmax = Math.max(r,g,b),
+    let cmin = Math.min(r, g, b),
+        cmax = Math.max(r, g, b),
         delta = cmax - cmin,
         h = 0,
         s = 0,
@@ -382,7 +391,7 @@ function applyVibe() {
     // Note: This is a destructive operation on the current state for simplicity,
     // but in a real app you might want to store base colors separate from display colors.
     // Here we will just regenerate from current hexes but shifted.
-    
+
     // Actually, to make it non-destructive and smooth, we should probably apply it to the CSS variables
     // and only commit to state when the slider is released? 
     // For simplicity in this vanilla app, we'll update state directly but maybe we need a 'baseColors' state?
@@ -393,18 +402,18 @@ function applyVibe() {
     // But then the hex codes in UI won't match.
     // Let's just update state.colors and accept some lossiness, or better:
     // Re-generate the theme with new saturation/lightness offsets if we had the seed.
-    
+
     // Alternative: The sliders are just for "tweaking" the current set.
     // We will iterate over all unlocked colors, convert to HSL, add offset, convert back.
     // To prevent drift, we should ideally store the "original" colors before sliding started.
     // But that adds complexity. Let's try direct modification for now.
-    
+
     // Wait, if I slide +10 then -10, I want to be back at 0.
     // So I need a reference point.
     // Let's assume the current state.colors IS the reference when generation happens.
     // But if I slide, I need to know the base.
     // Let's add `baseColors` to state.
-    
+
     if (!state.baseColors) {
         state.baseColors = { ...state.colors };
     }
@@ -420,7 +429,7 @@ function applyVibe() {
             state.colors[key] = hslToHex(hsl.h, newS, newL);
         }
     }
-    
+
     updateUI(true); // true = skip adding to history to avoid spamming stack while sliding
 }
 
@@ -475,15 +484,15 @@ function performUIUpdate(skipHistory) {
 function renderSwatches() {
     const container = document.getElementById('color-swatches');
     container.innerHTML = '';
-    
+
     for (const [key, value] of Object.entries(state.colors)) {
         const swatch = document.createElement('div');
         swatch.className = 'swatch';
         swatch.style.backgroundColor = value;
-        
+
         const label = document.createElement('span');
         label.innerText = key;
-        
+
         const controls = document.createElement('div');
         controls.style.display = 'flex';
         controls.style.alignItems = 'center';
@@ -505,16 +514,16 @@ function renderSwatches() {
         input.addEventListener('input', (e) => {
             state.colors[key] = e.target.value;
             // Update base color too so vibe check doesn't revert it
-            if(state.baseColors) state.baseColors[key] = e.target.value;
-            
+            if (state.baseColors) state.baseColors[key] = e.target.value;
+
             updatePreview();
             updateHash();
             checkContrast();
             updateGradient();
         });
         input.addEventListener('change', () => {
-             addToHistory();
-             updateOutputs();
+            addToHistory();
+            updateOutputs();
         });
 
         controls.appendChild(lockBtn);
@@ -529,10 +538,10 @@ function updateFontUI() {
     if (!headingFontName || !bodyFontName) return; // Safety check
     headingFontName.innerText = state.fonts.headingFont;
     bodyFontName.innerText = state.fonts.bodyFont;
-    
+
     lockHeadingBtn.innerHTML = state.locked.headingFont ? '🔒' : '🔓';
     lockHeadingBtn.className = `lock-btn ${state.locked.headingFont ? 'locked' : ''}`;
-    
+
     lockBodyBtn.innerHTML = state.locked.bodyFont ? '🔒' : '🔓';
     lockBodyBtn.className = `lock-btn ${state.locked.bodyFont ? 'locked' : ''}`;
 }
@@ -649,8 +658,184 @@ function renderPreviewLayout() {
                 </div>
             </div>
         `;
+    } else if (layout === 'components') {
+        previewFrame.innerHTML = `
+            <div class="component-showcase">
+                <h4>Buttons</h4>
+                <div class="button-group">
+                    <button class="preview-btn preview-btn-primary">Primary Button</button>
+                    <button class="preview-btn preview-btn-secondary">Secondary Button</button>
+                    <button class="preview-btn" style="background:var(--accent); color:white;">Accent Button</button>
+                </div>
+            </div>
+            <div class="component-showcase">
+                <h4>Alerts</h4>
+                <div class="alert-box">
+                    <strong>Info:</strong> This is an informational alert message.
+                </div>
+            </div>
+            <div class="component-showcase">
+                <h4>Badges</h4>
+                <div>
+                    <span class="badge-demo">New</span>
+                    <span class="badge-demo" style="background:var(--secondary);">Featured</span>
+                    <span class="badge-demo" style="background:var(--accent);">Sale</span>
+                </div>
+            </div>
+            <div class="component-showcase">
+                <h4>Form Inputs</h4>
+                <div class="form-demo">
+                    <input type="text" placeholder="Enter your name">
+                    <input type="email" placeholder="Enter your email">
+                    <button class="preview-btn preview-btn-primary">Submit</button>
+                </div>
+            </div>
+            <div class="component-showcase">
+                <h4>Cards</h4>
+                <div class="preview-card">
+                    <h4>Card Title</h4>
+                    <p>This is a card component with surface background and rounded corners.</p>
+                </div>
+            </div>
+        `;
+    } else if (layout === 'admin') {
+        previewFrame.innerHTML = `
+            <div class="admin-sidebar">
+                <h3>Admin Panel</h3>
+                <ul class="admin-nav">
+                    <li>Dashboard</li>
+                    <li>Users</li>
+                    <li>Analytics</li>
+                    <li>Settings</li>
+                </ul>
+            </div>
+            <div class="admin-main">
+                <div class="admin-header">
+                    <h2>Dashboard Overview</h2>
+                    <button class="preview-btn preview-btn-primary">New Report</button>
+                </div>
+                <div class="stat-cards">
+                    <div class="stat-card">
+                        <h4>Total Users</h4>
+                        <div class="stat-value">1,234</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Revenue</h4>
+                        <div class="stat-value">$45.2K</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Active Sessions</h4>
+                        <div class="stat-value">89</div>
+                    </div>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Doe</td>
+                            <td>john@example.com</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td>Jane Smith</td>
+                            <td>jane@example.com</td>
+                            <td>Active</td>
+                        </tr>
+                        <tr>
+                            <td>Bob Johnson</td>
+                            <td>bob@example.com</td>
+                            <td>Inactive</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+    } else if (layout === 'marketing') {
+        previewFrame.innerHTML = `
+            <div class="marketing-hero">
+                <h1>Transform Your Business</h1>
+                <p>The ultimate solution for modern companies</p>
+                <div class="cta-buttons">
+                    <button class="preview-btn" style="background:white; color:var(--primary); font-weight:bold;">Get Started Free</button>
+                    <button class="preview-btn" style="background:rgba(255,255,255,0.2); color:white; border:2px solid white;">Learn More</button>
+                </div>
+            </div>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Fast Performance</h3>
+                    <p>Lightning-fast load times and optimized for speed</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Reliable</h3>
+                    <p>Enterprise-grade security and 99.9% uptime</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Mobile Ready</h3>
+                    <p>Fully responsive design for all devices</p>
+                </div>
+            </div>
+            <div class="testimonials">
+                <h2>What Our Customers Say</h2>
+                <div class="testimonial-grid">
+                    <div class="testimonial-card">
+                        <p>"This product has completely transformed how we work. Highly recommended!"</p>
+                        <div class="testimonial-author">- Sarah Johnson, CEO</div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p>"The best investment we've made this year. Amazing results!"</p>
+                        <div class="testimonial-author">- Mike Chen, Founder</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (layout === 'app') {
+        previewFrame.innerHTML = `
+            <div class="app-header">
+                <h3>MyApp Dashboard</h3>
+                <div class="app-header-actions">
+                    <button class="preview-btn" style="background:rgba(255,255,255,0.2); color:white; padding:0.5rem 1rem;">Notifications</button>
+                    <button class="preview-btn" style="background:rgba(255,255,255,0.2); color:white; padding:0.5rem 1rem;">Profile</button>
+                </div>
+            </div>
+            <div class="app-body">
+                <div class="app-sidebar">
+                    <ul>
+                        <li class="active">Home</li>
+                        <li>Projects</li>
+                        <li>Tasks</li>
+                        <li>Team</li>
+                        <li>Settings</li>
+                    </ul>
+                </div>
+                <div class="app-content">
+                    <h2>Welcome Back!</h2>
+                    <div class="app-card">
+                        <h4>Recent Activity</h4>
+                        <p>You have 3 new notifications and 5 pending tasks.</p>
+                        <div class="app-actions">
+                            <button class="preview-btn preview-btn-primary">View Tasks</button>
+                            <button class="preview-btn preview-btn-secondary">View Notifications</button>
+                        </div>
+                    </div>
+                    <div class="app-card">
+                        <h4>Quick Stats</h4>
+                        <p>Projects: 12 | Completed: 8 | In Progress: 4</p>
+                    </div>
+                </div>
+            </div>
+        `;
     }
 }
+
 
 function updateVisionFilter() {
     const filter = state.visionFilter;
@@ -675,7 +860,7 @@ function loadFonts(fonts) {
         link.rel = 'stylesheet';
         document.head.appendChild(link);
     }
-    
+
     const fontQuery = fonts.map(f => f.replace(/ /g, '+')).join('|');
     link.href = `https://fonts.googleapis.com/css?family=${fontQuery}&display=swap`;
 }
@@ -814,9 +999,9 @@ function showToast(message) {
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerText = message;
-    
+
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(100%)';
@@ -863,11 +1048,11 @@ function downloadBrandCard() {
     const colors = Object.entries(state.colors);
     const swatchSize = canvas.width * 0.15;
     const gap = canvas.width * 0.05;
-    
+
     // Calculate Grid
     let cols = 3;
     if (size === 'story') cols = 2;
-    
+
     const totalWidth = cols * swatchSize + (cols - 1) * gap;
     const startX = (canvas.width - totalWidth) / 2;
     const startY = canvas.height * 0.3;
@@ -876,14 +1061,14 @@ function downloadBrandCard() {
         const [name, hex] = color;
         const col = index % cols;
         const row = Math.floor(index / cols);
-        
+
         const x = startX + col * (swatchSize + gap);
         const y = startY + row * (swatchSize + gap + 60);
 
         // Swatch Rect
         ctx.fillStyle = hex;
         ctx.fillRect(x, y, swatchSize, swatchSize);
-        
+
         // Label
         ctx.fillStyle = state.colors.text;
         ctx.textAlign = 'center';
@@ -968,7 +1153,7 @@ function renderSavedThemes() {
     savedThemes.forEach(theme => {
         const item = document.createElement('div');
         item.className = 'saved-theme-item';
-        
+
         const preview = document.createElement('div');
         preview.className = 'saved-theme-preview';
         Object.values(theme.colors).forEach(color => {
@@ -1011,7 +1196,7 @@ function loadTheme(theme) {
     state.vibe.brightness = 0;
     satSlider.value = 0;
     brightSlider.value = 0;
-    
+
     updateUI();
     showToast('Theme loaded!');
 }
@@ -1050,7 +1235,7 @@ function updateTypeScale() {
 function updateFocusRing() {
     state.focusRing.color = focusColorInput.value;
     state.focusRing.style = focusStyleSelect.value;
-    
+
     document.documentElement.style.setProperty('--focus-ring-color', state.focusRing.color);
     document.documentElement.style.setProperty('--focus-ring-style', state.focusRing.style);
 }
@@ -1061,23 +1246,23 @@ function handleImageUpload(e) {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
-            
+
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
             const colors = extractColors(imageData);
-            
+
             if (colors.length >= 6) {
                 // Map extracted colors to state
                 // We'll try to map them somewhat intelligently based on brightness
                 colors.sort((a, b) => getLuminance(b) - getLuminance(a)); // Lightest to Darkest
-                
+
                 // Assign based on typical usage
                 state.colors.background = colors[0]; // Lightest
                 state.colors.surface = colors[1];
@@ -1085,7 +1270,7 @@ function handleImageUpload(e) {
                 state.colors.primary = colors[3];
                 state.colors.accent = colors[4];
                 state.colors.text = colors[5]; // Darkest
-                
+
                 updateUI();
                 showToast('Theme generated from image!');
             } else {
@@ -1111,11 +1296,11 @@ async function handleFontUpload(e) {
             const fontFace = new FontFace(fontName, `url(${fontData})`);
             await fontFace.load();
             document.fonts.add(fontFace);
-            
+
             // Update State
             state.fonts.headingFont = fontName;
             state.fonts.bodyFont = fontName;
-            
+
             updateUI();
             showToast('Custom font loaded!');
         } catch (err) {
@@ -1133,19 +1318,19 @@ function extractColors(data) {
         const g = data[i + 1];
         const b = data[i + 2];
         const a = data[i + 3];
-        
+
         if (a < 128) continue; // Skip transparent
-        
+
         const hex = rgbToHex(r, g, b);
         if (!colorMap[hex]) colorMap[hex] = 0;
         colorMap[hex]++;
     }
-    
+
     // Sort by frequency
     const sortedColors = Object.entries(colorMap)
         .sort((a, b) => b[1] - a[1])
         .map(entry => entry[0]);
-        
+
     // Filter similar colors to get distinct palette
     const distinctColors = [];
     for (const color of sortedColors) {
@@ -1159,12 +1344,12 @@ function extractColors(data) {
         }
         if (isDistinct) distinctColors.push(color);
     }
-    
+
     // Fill if not enough
     while (distinctColors.length < 6) {
         distinctColors.push(getRandomHex());
     }
-    
+
     return distinctColors;
 }
 
@@ -1189,13 +1374,13 @@ function setupSnippetInteractions() {
         // Find closest interactive element or container
         // For simplicity, let's target specific classes we know exist in our layouts
         const target = e.target.closest('.preview-btn, .preview-card, .product-card, nav, header, footer, .dashboard-sidebar');
-        
+
         if (target) {
             e.stopPropagation();
             showSnippetModal(target);
         }
     });
-    
+
     // Add hover effect class
     previewFrame.addEventListener('mouseover', (e) => {
         const target = e.target.closest('.preview-btn, .preview-card, .product-card, nav, header, footer, .dashboard-sidebar');
@@ -1203,7 +1388,7 @@ function setupSnippetInteractions() {
             target.classList.add('interactive-element');
         }
     });
-    
+
     previewFrame.addEventListener('mouseout', (e) => {
         const target = e.target.closest('.interactive-element');
         if (target) {
@@ -1215,11 +1400,11 @@ function setupSnippetInteractions() {
 function showSnippetModal(element) {
     const modal = document.getElementById('snippet-modal');
     const codeArea = document.getElementById('snippet-code');
-    
+
     // Clone to clean up for display
     const clone = element.cloneNode(true);
     clone.classList.remove('interactive-element');
-    
+
     // Add ARIA attributes
     if (clone.tagName === 'BUTTON' || clone.classList.contains('preview-btn')) {
         if (!clone.hasAttribute('aria-label')) {
@@ -1243,16 +1428,16 @@ function showSnippetModal(element) {
         clone.setAttribute('role', 'complementary');
         clone.setAttribute('aria-label', 'Sidebar');
     }
-    
+
     // Get computed styles that are relevant (simplified)
     // In a real app, we might have pre-defined snippets. 
     // Here we will just show the HTML structure.
-    
+
     let snippet = clone.outerHTML;
-    
+
     // Prettify simple
     snippet = snippet.replace(/>\s*</g, '>\n<');
-    
+
     codeArea.value = snippet;
     modal.style.display = 'block';
 }
@@ -1263,19 +1448,19 @@ const closeModal = document.querySelector('.close-modal');
 const copySnippetBtn = document.getElementById('copy-snippet-btn');
 
 if (closeModal) {
-    closeModal.onclick = function() {
+    closeModal.onclick = function () {
         modal.style.display = "none";
     }
 }
 
-window.onclick = function(event) {
+window.onclick = function (event) {
     if (event.target == modal) {
         modal.style.display = "none";
     }
 }
 
 if (copySnippetBtn) {
-    copySnippetBtn.onclick = function() {
+    copySnippetBtn.onclick = function () {
         copyToClipboard(document.getElementById('snippet-code').value);
     }
 }
@@ -1289,7 +1474,7 @@ function updateHash() {
     }
     params.set('heading', state.fonts.headingFont);
     params.set('body', state.fonts.bodyFont);
-    
+
     const hash = params.toString();
     window.location.hash = hash;
     if (shareLinkInput) shareLinkInput.value = window.location.href;
@@ -1349,7 +1534,7 @@ function generateFromKeyword() {
 
     // Simple mapping logic
     let hue = Math.random() * 360;
-    
+
     if (['fire', 'red', 'hot', 'love', 'passion'].some(k => keyword.includes(k))) hue = 0; // Red
     else if (['orange', 'sunset', 'autumn'].some(k => keyword.includes(k))) hue = 30; // Orange
     else if (['gold', 'yellow', 'sun', 'happy'].some(k => keyword.includes(k))) hue = 50; // Yellow
@@ -1373,7 +1558,7 @@ function generateFromKeyword() {
     state.colors.primary = hslToHex(hue, 70, 50);
     state.colors.secondary = hslToHex((hue + 30) % 360, 60, 60);
     state.colors.accent = hslToHex((hue + 180) % 360, 80, 60); // Complementary accent
-    
+
     // Reset background for non-dark keywords
     state.colors.background = '#ffffff';
     state.colors.surface = '#f5f5f5';
@@ -1452,7 +1637,7 @@ function getContrastFix(bg, text) {
         hsl.l += step;
         if (hsl.l < 0) hsl.l = 0;
         if (hsl.l > 100) hsl.l = 100;
-        
+
         text = hslToHex(hsl.h, hsl.s, hsl.l);
         ratio = checkContrast(bg, text);
         safety++;
@@ -1464,10 +1649,10 @@ function fixContrast() {
     const bg = state.colors.background;
     const text = state.colors.text;
     const newText = getContrastFix(bg, text);
-    
+
     if (newText !== text) {
         state.colors.text = newText;
-        if(state.baseColors) state.baseColors.text = newText;
+        if (state.baseColors) state.baseColors.text = newText;
         updateUI();
         showToast('Contrast fixed!');
     } else {
@@ -1496,7 +1681,7 @@ function startTour() {
 function showTourStep() {
     const step = tourSteps[currentTourStep];
     const el = document.getElementById(step.id);
-    
+
     // Highlight element
     document.querySelectorAll('.tour-highlight').forEach(e => e.classList.remove('tour-highlight'));
     if (el) el.classList.add('tour-highlight');
@@ -1505,11 +1690,11 @@ function showTourStep() {
     const box = document.getElementById('tour-box');
     box.style.display = 'block'; // Fix: Ensure box is visible
     const rect = el ? el.getBoundingClientRect() : { top: 100, left: 100, height: 0 };
-    
+
     // Simple positioning logic (can be improved)
     let top = rect.top + rect.height + 10;
     let left = rect.left;
-    
+
     if (top + 200 > window.innerHeight) top = rect.top - 220; // Flip up if too low
     if (left + 300 > window.innerWidth) left = window.innerWidth - 320; // Shift left if too far right
 
@@ -1537,8 +1722,1104 @@ function endTour() {
 
 
 
+// === Markdown Spec Sheet Generator ===
+
+function generateMarkdownSpec(type = 'generic') {
+    const themeName = state.themeName || 'Custom Theme';
+    const date = new Date().toLocaleDateString();
+
+    // Get the selected type from dropdown if not provided
+    if (!type || type === 'generic') {
+        const specTypeSelect = document.getElementById('spec-type');
+        if (specTypeSelect) {
+            type = specTypeSelect.value;
+        }
+    }
+
+    const colorTable = `| Color Role | Hex Code | Usage |
+|------------|----------|-------|
+| Primary | \`${state.colors.primary}\` | Main brand color, primary buttons, headers |
+| Secondary | \`${state.colors.secondary}\` | Secondary actions, accents |
+| Accent | \`${state.colors.accent}\` | Highlights, call-to-action elements |
+| Background | \`${state.colors.background}\` | Page background |
+| Surface | \`${state.colors.surface}\` | Cards, containers, elevated surfaces |
+| Text | \`${state.colors.text}\` | Body text, headings |`;
+
+    const typographySection = `**Heading Font:** ${state.fonts.headingFont}
+- Usage: All headings (H1-H6), hero text, section titles
+
+**Body Font:** ${state.fonts.bodyFont}
+- Usage: Paragraphs, UI labels, navigation, buttons`;
+
+    if (type === 'marketing') {
+        return `# Marketing One-Page Website Specification
+**Generated by ThemeGen** | ${date}  
+**Theme Name:** ${themeName}
+
+---
+
+## 1. Project Overview
+
+**Website Name:** [Your Company/Product Name]
+
+**Tagline:** [Your compelling tagline]
+
+**Primary Goal:** [e.g., Generate leads, Drive sales, Build brand awareness]
+
+**Target Audience:** [Describe your ideal customer]
+
+---
+
+## 2. Design System
+
+### Color Palette
+${colorTable}
+
+### Typography
+${typographySection}
+
+---
+
+## 3. Page Sections
+
+### Hero Section
+**Headline:** [Your powerful headline - max 10 words]
+
+**Subheadline:** [Supporting text - 1-2 sentences]
+
+**CTA Button Text:** [e.g., "Get Started Free", "Request Demo"]
+
+**CTA Action:** [Where does the button lead?]
+
+**Hero Image/Video:** [Description or URL]
+
+**Background Style:** Gradient using Primary → Secondary colors
+
+### Features Section
+**Section Title:** [e.g., "Why Choose Us", "Key Features"]
+
+**Feature 1:**
+- Icon: [Emoji or icon name]
+- Title: [Feature name]
+- Description: [1-2 sentences]
+
+**Feature 2:**
+- Icon: [Emoji or icon name]
+- Title: [Feature name]
+- Description: [1-2 sentences]
+
+**Feature 3:**
+- Icon: [Emoji or icon name]
+- Title: [Feature name]
+- Description: [1-2 sentences]
+
+### Social Proof / Testimonials
+**Section Title:** [e.g., "What Our Customers Say"]
+
+**Testimonial 1:**
+- Quote: [Customer testimonial]
+- Author: [Name, Title/Company]
+
+**Testimonial 2:**
+- Quote: [Customer testimonial]
+- Author: [Name, Title/Company]
+
+### Pricing (Optional)
+**Plan 1:**
+- Name: [e.g., "Starter"]
+- Price: [e.g., "$29/month"]
+- Features: [List 3-5 key features]
+
+**Plan 2:**
+- Name: [e.g., "Pro"]
+- Price: [e.g., "$99/month"]
+- Features: [List 3-5 key features]
+
+### Call-to-Action Section
+**Headline:** [Final compelling CTA]
+
+**Button Text:** [Action text]
+
+**Supporting Text:** [Optional reassurance text]
+
+### Footer
+**Links:**
+- About
+- Privacy Policy
+- Terms of Service
+- Contact
+
+**Social Media:** [List platforms and URLs]
+
+**Copyright:** © ${new Date().getFullYear()} [Your Company]
+
+---
+
+## 4. Technical Requirements
+
+**Platform:** [e.g., WordPress, Webflow, Custom HTML/CSS]
+
+**Responsive:** Mobile-first design
+
+**Performance:** Page load < 2 seconds
+
+**Forms:** Email capture integration with [e.g., Mailchimp, ConvertKit]
+
+**Analytics:** Google Analytics 4
+
+---
+
+## 5. Content Checklist
+
+- [ ] Logo (SVG format, transparent background)
+- [ ] Hero image/video
+- [ ] Feature icons (3)
+- [ ] Customer testimonial photos (2-3)
+- [ ] Company/product screenshots
+- [ ] Social media icons
+
+---
+
+*Customize all bracketed sections with your specific content.*`;
+
+    } else if (type === 'blog') {
+        return `# Markdown Blog Specification
+**Generated by ThemeGen** | ${date}  
+**Theme Name:** ${themeName}
+
+---
+
+## 1. Blog Overview
+
+**Blog Name:** [Your Blog Title]
+
+**Tagline:** [Brief description]
+
+**Primary Topics:** [List 3-5 main categories]
+
+**Target Audience:** [Who are you writing for?]
+
+**Publishing Frequency:** [e.g., 2 posts per week]
+
+---
+
+## 2. Design System
+
+### Color Palette
+${colorTable}
+
+**Usage Guidelines:**
+- Primary: Article links, category tags
+- Secondary: Sidebar elements, related posts
+- Accent: Call-out boxes, highlights
+- Surface: Code blocks, quote backgrounds
+
+### Typography
+${typographySection}
+
+**Reading Experience:**
+- Line height: 1.7 for body text
+- Max content width: 700px
+- Font size: 18px base for optimal readability
+
+---
+
+## 3. Blog Structure
+
+### Homepage
+**Layout:** [Grid/List/Magazine style]
+
+**Featured Post:** Large hero card with image
+
+**Recent Posts:** [Number] posts per page
+
+**Sidebar Elements:**
+- About the author
+- Categories
+- Popular posts
+- Newsletter signup
+- Social media links
+
+### Article Page Template
+**Elements:**
+- Featured image
+- Title (H1)
+- Author bio with photo
+- Publish date
+- Reading time estimate
+- Category tags
+- Table of contents (for long posts)
+- Social sharing buttons
+- Related posts (3-4)
+- Comments section
+
+### Category Pages
+**Display:** Filtered list of posts by category
+
+**Categories to Create:**
+- [Category 1]
+- [Category 2]
+- [Category 3]
+- [Category 4]
+
+### About Page
+**Content:**
+- Author photo
+- Bio (2-3 paragraphs)
+- Why you started the blog
+- Contact information
+
+---
+
+## 4. Markdown Features
+
+**Supported Elements:**
+\`\`\`markdown
+# Headings (H1-H6)
+**Bold** and *italic* text
+[Links](url)
+![Images](url)
+> Blockquotes
+- Unordered lists
+1. Ordered lists
+\`inline code\`
+\`\`\`code blocks\`\`\`
+Tables
+---
+\`\`\`
+
+**Custom Components:**
+- Call-out boxes (info, warning, tip)
+- Code syntax highlighting
+- Image galleries
+- Embedded videos
+
+---
+
+## 5. Content Strategy
+
+**Post Types:**
+1. **How-To Guides:** Step-by-step tutorials
+2. **Listicles:** "Top 10" style posts
+3. **Opinion Pieces:** Thought leadership
+4. **Case Studies:** Real-world examples
+5. **News/Updates:** Industry trends
+
+**SEO Requirements:**
+- Meta title (max 60 characters)
+- Meta description (max 160 characters)
+- Alt text for all images
+- Internal linking strategy
+- Schema markup for articles
+
+---
+
+## 6. Technical Stack
+
+**Static Site Generator:** [e.g., Hugo, Jekyll, Next.js]
+
+**Hosting:** [e.g., Netlify, Vercel, GitHub Pages]
+
+**CMS:** [e.g., Markdown files, Contentful, Sanity]
+
+**Search:** [Algolia, Lunr.js, or built-in]
+
+**Comments:** [Disqus, Commento, or custom]
+
+**Newsletter:** [ConvertKit, Mailchimp integration]
+
+---
+
+## 7. Launch Checklist
+
+- [ ] 5-10 initial posts written
+- [ ] About page complete
+- [ ] RSS feed configured
+- [ ] Social media accounts created
+- [ ] Newsletter signup form tested
+- [ ] Mobile responsiveness verified
+- [ ] Page speed optimized (90+ Lighthouse score)
+- [ ] Analytics installed
+
+---
+
+*Fill in all bracketed sections and start writing!*`;
+
+    } else if (type === 'linktree') {
+        return `# Mobile Link Page Specification (Link-in-Bio)
+**Generated by ThemeGen** | ${date}  
+**Theme Name:** ${themeName}
+
+---
+
+## 1. Page Overview
+
+**Profile Name:** [Your Name / Brand]
+
+**Bio:** [One-line description - max 100 characters]
+
+**Profile Picture:** [URL or description]
+
+**Background:** [Solid color, gradient, or image]
+
+---
+
+## 2. Design System
+
+### Color Palette
+${colorTable}
+
+**Visual Style:**
+- Background: ${state.colors.background} or gradient (Primary → Secondary)
+- Link buttons: ${state.colors.surface} with ${state.colors.primary} accent
+- Text: ${state.colors.text}
+- Hover effects: ${state.colors.accent}
+
+### Typography
+${typographySection}
+
+**Button Style:**
+- Border radius: 12px (rounded)
+- Padding: 16px 24px
+- Font weight: 600
+- Shadow: Subtle drop shadow
+
+---
+
+## 3. Links Configuration
+
+### Link 1
+**Title:** [e.g., "Latest YouTube Video"]
+
+**URL:** [https://...]
+
+**Icon:** [Optional emoji or icon]
+
+**Style:** Primary button
+
+### Link 2
+**Title:** [e.g., "Shop My Store"]
+
+**URL:** [https://...]
+
+**Icon:** [Optional emoji or icon]
+
+**Style:** Primary button
+
+### Link 3
+**Title:** [e.g., "Read My Blog"]
+
+**URL:** [https://...]
+
+**Icon:** [Optional emoji or icon]
+
+**Style:** Primary button
+
+### Link 4
+**Title:** [e.g., "Book a Call"]
+
+**URL:** [https://...]
+
+**Icon:** [Optional emoji or icon]
+
+**Style:** Accent button (highlighted)
+
+### Link 5
+**Title:** [e.g., "Free Resource"]
+
+**URL:** [https://...]
+
+**Icon:** [Optional emoji or icon]
+
+**Style:** Primary button
+
+**[Add more links as needed]**
+
+---
+
+## 4. Social Media Icons
+
+**Platforms to Include:**
+- [ ] Instagram: [URL]
+- [ ] Twitter/X: [URL]
+- [ ] TikTok: [URL]
+- [ ] YouTube: [URL]
+- [ ] LinkedIn: [URL]
+- [ ] Facebook: [URL]
+- [ ] Email: [address]
+
+**Icon Style:** Circular, ${state.colors.accent} background, white icons
+
+---
+
+## 5. Features
+
+**Analytics:**
+- Track link clicks
+- View count
+- Traffic sources
+
+**Customization:**
+- Custom domain: [yourdomain.com]
+- Favicon
+- Open Graph image for social sharing
+
+**Optional Elements:**
+- Newsletter signup form
+- Embedded video
+- Image gallery
+- Music player widget
+- Countdown timer for launches
+
+---
+
+## 6. Mobile Optimization
+
+**Viewport:** Optimized for 375px - 428px width
+
+**Touch Targets:** Minimum 44px height for easy tapping
+
+**Loading:** Under 1 second load time
+
+**Animations:** Subtle fade-in on scroll
+
+---
+
+## 7. Platform Options
+
+**DIY Solutions:**
+- Custom HTML/CSS (full control)
+- Carrd
+- Bio.link
+
+**Hosted Platforms:**
+- Linktree
+- Beacons
+- Tap.bio
+- Koji
+
+---
+
+## 8. Content Strategy
+
+**Update Frequency:** Weekly or when launching new content
+
+**Link Priority:** Most important links at the top
+
+**Call-to-Action:** Clear, action-oriented button text
+
+**Seasonal Updates:** Rotate links for campaigns/launches
+
+---
+
+## 9. Launch Checklist
+
+- [ ] Profile picture uploaded (400x400px minimum)
+- [ ] Bio written and proofread
+- [ ] All links tested and working
+- [ ] Social icons linked correctly
+- [ ] Mobile preview checked
+- [ ] Analytics configured
+- [ ] Custom domain connected (if applicable)
+- [ ] Shared on all social media profiles
+
+---
+
+*Update your links regularly to keep your audience engaged!*`;
+
+    } else if (type === 'portfolio') {
+        return `# Portfolio Website Specification
+**Generated by ThemeGen** | ${date}  
+**Theme Name:** ${themeName}
+
+---
+
+## 1. Portfolio Overview
+
+**Your Name:** [Full Name]
+
+**Professional Title:** [e.g., "Full-Stack Developer", "UX Designer", "Photographer"]
+
+**Tagline:** [One compelling sentence about what you do]
+
+**Location:** [City, Country or "Remote"]
+
+---
+
+## 2. Design System
+
+### Color Palette
+${colorTable}
+
+**Design Approach:**
+- Minimalist and clean
+- Focus on showcasing work
+- Professional yet personal
+- Strong visual hierarchy
+
+### Typography
+${typographySection}
+
+---
+
+## 3. Page Structure
+
+### Homepage / Hero
+**Hero Section:**
+- Large heading with your name
+- Professional title
+- Brief intro (2-3 sentences)
+- CTA button: "View My Work" or "Get in Touch"
+- Professional photo or avatar
+
+**Featured Projects:** 3-4 best projects in grid layout
+
+**Skills Overview:** Visual representation of key skills
+
+**Quick Stats (Optional):**
+- Years of experience
+- Projects completed
+- Happy clients
+- Awards won
+
+### About Page
+**Content:**
+- Professional photo
+- Detailed bio (3-4 paragraphs)
+- Career journey
+- Skills & expertise
+- Education & certifications
+- Personal interests (optional)
+- Downloadable resume/CV
+
+**Skills Section:**
+\`\`\`
+Technical Skills:
+- [Skill 1] - [Proficiency level]
+- [Skill 2] - [Proficiency level]
+- [Skill 3] - [Proficiency level]
+
+Tools & Technologies:
+- [Tool 1], [Tool 2], [Tool 3]
+\`\`\`
+
+### Portfolio/Work Page
+**Project 1:**
+- Project name
+- Client/Company (if applicable)
+- Role
+- Technologies used
+- Challenge/Problem
+- Solution/Approach
+- Results/Impact
+- Images/Screenshots (3-5)
+- Live demo link
+- GitHub repo (if applicable)
+
+**Project 2:**
+[Same structure as Project 1]
+
+**Project 3:**
+[Same structure as Project 1]
+
+**[Add 5-10 total projects]**
+
+**Project Categories:**
+- [Category 1: e.g., Web Development]
+- [Category 2: e.g., Mobile Apps]
+- [Category 3: e.g., Design]
+
+### Services Page (Optional)
+**Service 1:**
+- Name
+- Description
+- What's included
+- Typical timeline
+- Starting price (optional)
+
+**Service 2:**
+[Same structure]
+
+**Service 3:**
+[Same structure]
+
+### Contact Page
+**Contact Form:**
+- Name
+- Email
+- Subject
+- Message
+- Submit button
+
+**Alternative Contact Methods:**
+- Email: [your@email.com]
+- Phone: [Optional]
+- LinkedIn: [URL]
+- Location: [City/Remote]
+
+**Availability:**
+- Current status: [Available for hire / Fully booked / Open to opportunities]
+- Response time: [e.g., "Within 24 hours"]
+
+---
+
+## 4. Components
+
+**Navigation:**
+- Logo/Name
+- Home
+- About
+- Portfolio/Work
+- Services (optional)
+- Blog (optional)
+- Contact
+
+**Footer:**
+- Social media links
+- Email
+- Copyright
+- "Back to top" button
+
+**Project Cards:**
+- Thumbnail image
+- Project title
+- Brief description (1 sentence)
+- Tags/technologies
+- Hover effect revealing "View Project"
+
+---
+
+## 5. Content Requirements
+
+**Images Needed:**
+- Professional headshot (high resolution)
+- Project screenshots (3-5 per project)
+- Process photos (optional)
+- Behind-the-scenes (optional)
+
+**Written Content:**
+- Bio (short and long versions)
+- Project case studies
+- Service descriptions
+- Testimonials (3-5)
+
+**Testimonials Format:**
+\`\`\`
+"[Testimonial quote]"
+- [Client Name], [Title] at [Company]
+\`\`\`
+
+---
+
+## 6. Technical Requirements
+
+**Performance:**
+- Lighthouse score: 90+
+- Image optimization: WebP format
+- Lazy loading for images
+- Smooth page transitions
+
+**SEO:**
+- Meta tags for all pages
+- Open Graph images
+- Structured data (Person schema)
+- XML sitemap
+
+**Responsive Design:**
+- Mobile-first approach
+- Breakpoints: 375px, 768px, 1024px, 1440px
+- Touch-friendly navigation
+
+**Hosting:**
+- [Platform: e.g., Vercel, Netlify, GitHub Pages]
+- Custom domain
+- SSL certificate
+- CDN for global performance
+
+---
+
+## 7. Optional Features
+
+- [ ] Blog section for articles/thoughts
+- [ ] Dark mode toggle
+- [ ] Animations (subtle, not distracting)
+- [ ] Filterable portfolio grid
+- [ ] Client logo showcase
+- [ ] Awards & recognition section
+- [ ] Speaking engagements
+- [ ] Newsletter signup
+
+---
+
+## 8. Launch Checklist
+
+- [ ] All projects documented with case studies
+- [ ] Professional photos taken
+- [ ] Resume/CV updated and downloadable
+- [ ] Contact form tested
+- [ ] All links working
+- [ ] Mobile responsiveness verified
+- [ ] Page speed optimized
+- [ ] SEO metadata complete
+- [ ] Analytics installed
+- [ ] Shared on LinkedIn and social media
+
+---
+
+*Your portfolio is your digital handshake - make it count!*`;
+
+    } else {
+        // Generic template (original)
+        return `# Website Specification Sheet
+**Generated by ThemeGen** | ${date}  
+**Theme Name:** ${themeName}
+
+---
+
+## 1. Project Overview
+
+**Project Name:** [Enter your project name]
+
+**Description:** [Brief description of the website purpose and goals]
+
+**Target Audience:** [Describe your target users]
+
+**Key Objectives:**
+- [Objective 1]
+- [Objective 2]
+- [Objective 3]
+
+---
+
+## 2. Design System
+
+### Color Palette
+${colorTable}
+
+**Color Usage Guidelines:**
+- Use Primary color for main CTAs and navigation highlights
+- Use Secondary color for supporting elements
+- Use Accent color sparingly for important highlights
+- Maintain WCAG AA contrast ratios (minimum 4.5:1 for text)
+
+### Typography
+${typographySection}
+
+**Type Scale:** ${state.typeScale || '1.25 (Major Third)'}
+
+**Font Sizes:**
+\`\`\`css
+--text-xs: 0.64rem;
+--text-sm: 0.8rem;
+--text-base: 1rem;
+--text-lg: 1.25rem;
+--text-xl: 1.563rem;
+--text-2xl: 1.953rem;
+--text-3xl: 2.441rem;
+--text-4xl: 3.052rem;
+\`\`\`
+
+---
+
+## 3. Pages & Layouts
+
+### Homepage
+**Purpose:** [Describe homepage purpose]
+
+**Sections:**
+1. **Hero Section**
+   - Headline: [Your main headline]
+   - Subheadline: [Supporting text]
+   - CTA: [Button text and action]
+   - Visual: [Image/video description]
+
+2. **Features Section**
+   - Feature 1: [Title and description]
+   - Feature 2: [Title and description]
+   - Feature 3: [Title and description]
+
+3. **[Additional sections...]**
+
+### 3.2 [Other Pages]
+**Page Name:** [e.g., About, Services, Contact]
+- Purpose: [Page purpose]
+- Key Content: [Main content elements]
+- CTAs: [Call-to-action buttons]
+
+---
+
+## 4. Components
+
+### 4.1 Navigation
+- **Type:** [Horizontal/Vertical/Hamburger]
+- **Items:** [List navigation items]
+- **Behavior:** [Sticky/Fixed/Static]
+- **Mobile:** [Describe mobile navigation]
+
+### 4.2 Buttons
+**Primary Button:**
+- Background: ${state.colors.primary}
+- Text: White
+- Hover: [Describe hover effect]
+- Usage: Main CTAs
+
+**Secondary Button:**
+- Background: ${state.colors.secondary}
+- Text: ${state.colors.text}
+- Hover: [Describe hover effect]
+- Usage: Secondary actions
+
+### 4.3 Cards
+- Background: ${state.colors.surface}
+- Border: [Specify border style]
+- Shadow: [Specify shadow]
+- Padding: [Specify padding]
+- Border Radius: [Specify radius]
+
+### 4.4 Forms
+**Input Fields:**
+- Border: ${state.colors.accent}
+- Focus State: [Describe focus styling]
+- Error State: [Describe error styling]
+- Placeholder: [Specify placeholder color]
+
+**Form Validation:**
+- [Describe validation requirements]
+
+### 4.5 [Additional Components]
+- Modals
+- Alerts/Notifications
+- Badges
+- Tables
+- [Add more as needed]
+
+---
+
+## 5. Content Requirements
+
+### 5.1 Text Content
+**Homepage:**
+- Hero Headline: [Your headline here]
+- Hero Subtext: [Your subtext here]
+- Feature 1 Title: [Title]
+- Feature 1 Description: [Description]
+- [Continue for all sections...]
+
+### 5.2 Images & Media
+**Required Images:**
+1. Hero Image: [Dimensions, description]
+2. Feature Icons: [Quantity, style, dimensions]
+3. Team Photos: [Quantity, dimensions]
+4. [Additional images...]
+
+**Image Guidelines:**
+- Format: [JPG/PNG/WebP]
+- Optimization: [Max file size]
+- Alt Text: [Requirements for accessibility]
+
+### 5.3 Icons
+- **Icon Set:** [Specify icon library or custom]
+- **Style:** [Outline/Filled/Duotone]
+- **Size:** [Standard sizes]
+
+---
+
+## 6. Functionality & Features
+
+### 6.1 Core Features
+- [ ] [Feature 1 description]
+- [ ] [Feature 2 description]
+- [ ] [Feature 3 description]
+
+### 6.2 Forms & Interactions
+**Contact Form:**
+- Fields: [Name, Email, Message, etc.]
+- Validation: [Required fields, format validation]
+- Submission: [Where does data go?]
+- Success Message: [What happens after submission?]
+
+**Newsletter Signup:**
+- Fields: [Email]
+- Integration: [Email service provider]
+
+### 6.3 Third-Party Integrations
+- [ ] Analytics: [Google Analytics, etc.]
+- [ ] Email: [Mailchimp, etc.]
+- [ ] Social Media: [Links, sharing buttons]
+- [ ] [Other integrations...]
+
+---
+
+## 7. Technical Requirements
+
+### 7.1 Performance
+- Page Load Time: [Target: < 3 seconds]
+- Mobile Performance: [Target Lighthouse score]
+- Image Optimization: [WebP, lazy loading]
+
+### 7.2 Responsive Design
+**Breakpoints:**
+\`\`\`css
+Mobile: 320px - 767px
+Tablet: 768px - 1023px
+Desktop: 1024px+
+\`\`\`
+
+**Mobile-First Approach:** [Yes/No]
+
+### 7.3 Browser Support
+- Chrome (latest 2 versions)
+- Firefox (latest 2 versions)
+- Safari (latest 2 versions)
+- Edge (latest 2 versions)
+- [Mobile browsers...]
+
+### 7.4 Accessibility
+- WCAG Level: [AA/AAA]
+- Screen Reader Support: [Yes]
+- Keyboard Navigation: [Yes]
+- Focus Indicators: [Visible and clear]
+- Alt Text: [Required for all images]
+
+### 7.5 SEO Requirements
+- Meta Titles: [Max 60 characters]
+- Meta Descriptions: [Max 160 characters]
+- Open Graph Tags: [For social sharing]
+- Structured Data: [Schema.org markup]
+- Sitemap: [XML sitemap]
+
+---
+
+## 8. Deployment & Hosting
+
+**Hosting Platform:** [e.g., Vercel, Netlify, AWS]
+
+**Domain:** [Your domain name]
+
+**SSL Certificate:** [Required]
+
+**Deployment Process:** [Describe deployment workflow]
+
+---
+
+## 9. Timeline & Milestones
+
+| Phase | Deliverable | Timeline |
+|-------|-------------|----------|
+| Design | Mockups & Prototypes | [Date range] |
+| Development | Frontend Build | [Date range] |
+| Content | Content Creation | [Date range] |
+| Testing | QA & Bug Fixes | [Date range] |
+| Launch | Go Live | [Target date] |
+
+---
+
+## 10. Success Metrics
+
+**Key Performance Indicators:**
+- [ ] [Metric 1: e.g., Conversion rate > 3%]
+- [ ] [Metric 2: e.g., Bounce rate < 40%]
+- [ ] [Metric 3: e.g., Page load time < 2s]
+- [ ] [Metric 4: e.g., Mobile traffic > 50%]
+
+---
+
+## 11. Additional Notes
+
+[Add any additional requirements, constraints, or special considerations here]
+
+---
+
+**Next Steps:**
+1. Review and fill in all placeholder sections
+2. Share with development team
+3. Create detailed wireframes/mockups
+4. Begin development with approved spec
+
+---
+
+*This specification sheet was generated using ThemeGen. Customize all placeholder sections to match your specific project requirements.*
+`;
+    }
+}
+
+function showSpecModal() {
+    const modal = document.getElementById('spec-modal');
+    const output = document.getElementById('spec-output');
+    const specTypeSelect = document.getElementById('spec-type');
+
+    if (!modal || !output) return;
+
+    // Generate spec based on selected type
+    const type = specTypeSelect ? specTypeSelect.value : 'generic';
+    const spec = generateMarkdownSpec(type);
+    output.value = spec;
+    modal.style.display = 'block';
+
+    // Add event listener for type change
+    if (specTypeSelect) {
+        specTypeSelect.onchange = function () {
+            const newSpec = generateMarkdownSpec(this.value);
+            output.value = newSpec;
+        };
+    }
+
+    // Add event listeners for modal close
+    const closeBtn = document.getElementById('close-spec-modal');
+    if (closeBtn) {
+        closeBtn.onclick = closeSpecModal;
+    }
+
+    // Close on outside click
+    modal.onclick = function (event) {
+        if (event.target === modal) {
+            closeSpecModal();
+        }
+    };
+
+    // Close on ESC key
+    document.addEventListener('keydown', handleSpecModalEscape);
+}
+
+function closeSpecModal() {
+    const modal = document.getElementById('spec-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    document.removeEventListener('keydown', handleSpecModalEscape);
+}
+
+function handleSpecModalEscape(e) {
+    if (e.key === 'Escape') {
+        closeSpecModal();
+    }
+}
+
+function copySpecSheet() {
+    const output = document.getElementById('spec-output');
+    if (output) {
+        copyToClipboard(output.value);
+    }
+}
+
+function downloadSpecSheet() {
+    const output = document.getElementById('spec-output');
+    if (!output) return;
+
+    const spec = output.value;
+    const blob = new Blob([spec], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'spec-sheet.md';
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('Spec sheet downloaded!');
+}
+
+
 // Global Error Handler for debugging
-window.onerror = function(msg, url, line, col, error) {
+window.onerror = function (msg, url, line, col, error) {
     // alert(`Error: ${msg}\nLine: ${line}`); // Uncomment if needed for user feedback
     console.error('Global Error:', msg, error);
 };
@@ -1562,6 +2843,8 @@ if (typeof module !== 'undefined' && module.exports) {
         updateOutputs,
         downloadBrandCard,
         updateUI,
+        generateMarkdownSpec,
         state
     };
 }
+
