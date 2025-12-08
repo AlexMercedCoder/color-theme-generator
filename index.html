@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Theme Generator</title>
+    <title>ThemeGen - Advanced Website Theme Generator</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
 
@@ -32,6 +33,11 @@
                     <option value="complementary">Complementary</option>
                     <option value="triadic">Triadic</option>
                 </select>
+            </div>
+
+            <div class="control-group">
+                <label>Magic Keyword</label>
+                <input type="text" id="magic-keyword" placeholder="e.g. Fire, Ocean, Forest">
             </div>
 
             <div class="control-group">
@@ -143,6 +149,7 @@
                     <button class="tab-btn" data-tab="css">CSS</button>
                     <button class="tab-btn" data-tab="scss">SCSS</button>
                     <button class="tab-btn" data-tab="tailwind">Tailwind</button>
+                    <button class="tab-btn" data-tab="tokens">Tokens</button>
                 </div>
                 <textarea id="code-output" readonly></textarea>
                 <button id="copy-code-btn" class="secondary-btn">Copy Code</button>

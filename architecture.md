@@ -75,8 +75,16 @@ The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that a
 ### Image to Theme
 Uses the Canvas API to analyze an uploaded image. It samples pixels, calculates frequency, and uses a simple clustering algorithm (based on Euclidean distance in RGB space) to extract 6 distinct dominant colors, which are then mapped to the theme palette based on luminance.
 
+### Text-to-Theme (Magic Keyword)
+Maps user-input keywords (e.g., "fire", "ocean") to specific hue ranges or presets. It uses a simple keyword matching logic to seed the random generation, ensuring the resulting theme matches the "vibe" of the word.
+
 ### Zen Mode
 Toggles a class on the `<body>` that hides all panels except the preview area, allowing for distraction-free viewing.
+
+### PWA Support
+The application is a fully installable Progressive Web App (PWA).
+- **Manifest**: `manifest.json` defines the app name, icons, and display mode.
+- **Service Worker**: `sw.js` caches core assets (`index.html`, `styles.css`, `script.js`) for offline functionality.
 
 ### Accessibility Tools
 - **Contrast Checker**: WCAG ratio calculation.

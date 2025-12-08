@@ -140,6 +140,9 @@ function setupEventListeners() {
     document.getElementById('type-scale').addEventListener('change', updateTypeScale);
     document.getElementById('zen-mode-btn').addEventListener('click', toggleZenMode);
     
+    // Phase 6 Listeners
+    document.getElementById('magic-keyword').addEventListener('change', generateFromKeyword);
+
     setupSnippetInteractions();
     renderPreviewLayout(); // Fix: Ensure preview is rendered on load
 
@@ -629,6 +632,20 @@ function updateOutputs() {
         output += `        heading: ['${state.fonts.headingFont}', 'sans-serif'],\n`;
         output += `        body: ['${state.fonts.bodyFont}', 'sans-serif'],\n`;
         output += `      }\n    }\n  }\n}`;
+    } else if (state.activeTab === 'tokens') {
+        const tokens = {
+            color: {},
+            font: {
+                family: {
+                    heading: { value: state.fonts.headingFont },
+                    body: { value: state.fonts.bodyFont }
+                }
+            }
+        };
+        for (const [key, value] of Object.entries(state.colors)) {
+            tokens.color[key] = { value: value };
+        }
+        output = JSON.stringify(tokens, null, 2);
     }
 
     codeOutput.value = output;
@@ -1114,6 +1131,56 @@ function hexToRgb(hex) {
         parseInt(result[2], 16),
         parseInt(result[3], 16)
     ] : [0, 0, 0];
+}
+
+// Text-to-Theme
+function generateFromKeyword() {
+    const keyword = document.getElementById('magic-keyword').value.toLowerCase();
+    if (!keyword) return;
+
+    // Simple mapping logic
+    let hue = Math.random() * 360;
+    
+    if (['fire', 'red', 'hot', 'love', 'passion'].some(k => keyword.includes(k))) hue = 0; // Red
+    else if (['orange', 'sunset', 'autumn'].some(k => keyword.includes(k))) hue = 30; // Orange
+    else if (['gold', 'yellow', 'sun', 'happy'].some(k => keyword.includes(k))) hue = 50; // Yellow
+    else if (['forest', 'green', 'nature', 'lime'].some(k => keyword.includes(k))) hue = 120; // Green
+    else if (['ocean', 'blue', 'sky', 'water', 'tech'].some(k => keyword.includes(k))) hue = 210; // Blue
+    else if (['purple', 'royal', 'magic', 'mystery'].some(k => keyword.includes(k))) hue = 270; // Purple
+    else if (['pink', 'rose', 'candy'].some(k => keyword.includes(k))) hue = 330; // Pink
+    else if (['dark', 'night', 'black'].some(k => keyword.includes(k))) {
+        // Special case for dark
+        state.colors.background = '#1a1a1a';
+        state.colors.surface = '#2d2d2d';
+        state.colors.text = '#f0f0f0';
+        state.colors.primary = hslToHex(Math.random() * 360, 70, 60);
+        state.colors.secondary = hslToHex(Math.random() * 360, 60, 50);
+        state.colors.accent = hslToHex(Math.random() * 360, 80, 70);
+        updateUI();
+        return;
+    }
+
+    // Generate monochromatic-ish based on hue
+    state.colors.primary = hslToHex(hue, 70, 50);
+    state.colors.secondary = hslToHex((hue + 30) % 360, 60, 60);
+    state.colors.accent = hslToHex((hue + 180) % 360, 80, 60); // Complementary accent
+    
+    // Reset background for non-dark keywords
+    state.colors.background = '#ffffff';
+    state.colors.surface = '#f5f5f5';
+    state.colors.text = '#000000';
+
+    updateUI();
+    showToast(`Theme generated for "${keyword}"!`);
+}
+
+// Service Worker Registration
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('Service Worker Registered'))
+            .catch(err => console.log('Service Worker Error:', err));
+    });
 }
 
 // Start

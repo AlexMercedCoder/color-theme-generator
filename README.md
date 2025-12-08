@@ -9,9 +9,12 @@ A single-page web application that generates random website themes (color palett
 - **Multi-Format Export**: Get your theme in JSON, CSS Variables, SCSS, or Tailwind Config.
 - **Brand Card**: Download a professional PNG image of your theme for sharing.
 - **Image to Theme**: Upload an image to automatically extract a matching color palette.
+- **Text-to-Theme**: Type a "Magic Keyword" (e.g., "Forest", "Cyberpunk") to generate a theme instantly.
 - **Typography Scale**: Ensure perfect font sizing with modular scales (Golden Ratio, Major Third, etc.).
 - **Zen Mode**: Hide all distractions and focus purely on your theme.
 - **Component Snippets**: Click any element in the preview to get its exact HTML/CSS code.
+- **Design Tokens**: Export your theme as W3C standard Design Tokens JSON.
+- **PWA Support**: Install the app on your device and use it offline.
 - **Live Preview**: See your theme applied instantly to a realistic mini-webpage.
 - **Multiple Layouts**: Preview on Landing Page, Dashboard, Blog, or E-commerce layouts.
 - **Manual Tweaking**: Fine-tune individual colors with pickers.
@@ -28,7 +31,7 @@ A single-page web application that generates random website themes (color palett
 ## Usage
 1. Open `index.html` in your browser.
 2. Select a **Palette Mode** (or leave as Random).
-3. **Upload an Image** to generate a theme from it (optional).
+3. **Upload an Image** OR type a **Magic Keyword** to generate a theme.
 4. Click **Generate New Theme** (or press Space).
 5. **Lock** any colors or fonts you like.
 6. Use **Vibe Sliders** to adjust saturation and brightness.
@@ -39,7 +42,7 @@ A single-page web application that generates random website themes (color palett
 11. Use the **Vision Simulator** to ensure accessibility.
 12. Click **Save Current Theme** to keep it for later.
 13. Click **Download Brand Card** to share your theme.
-14. Select your preferred output format (JSON/CSS/SCSS/Tailwind) and copy.
+14. Select your preferred output format (JSON/CSS/SCSS/Tailwind/Tokens) and copy.
 
 ## Installation
 No installation required! This is a static site.
