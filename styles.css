@@ -498,7 +498,7 @@ body.dark-mode .preview-controls {
     display: grid;
     grid-template-columns: 200px 1fr;
     grid-template-rows: 60px 1fr;
-    height: 100%;
+    min-height: 100%;
 }
 
 .dashboard-sidebar {
@@ -744,3 +744,88 @@ body.dark-mode #snippet-code {
 #preview-frame h4 { font-size: var(--text-xl); }
 #preview-frame p, #preview-frame li { font-size: var(--text-base); }
 #preview-frame small { font-size: var(--text-sm); }
+
+/* --- Phase 7 Styles --- */
+
+/* Theme Name Badge */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.theme-name-badge {
+    background: rgba(0,0,0,0.05);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #666;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+body.dark-mode .theme-name-badge {
+    background: rgba(255,255,255,0.1);
+    color: #ccc;
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* Fix Contrast Button */
+.small-btn {
+    padding: 0.1rem 0.4rem;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+}
+
+/* Tour Overlay */
+.tour-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    pointer-events: auto; /* Blocks clicks behind */
+}
+
+/* Highlighted Element (relative to overlay) */
+.tour-highlight {
+    position: relative;
+    z-index: 2001;
+    box-shadow: 0 0 0 4px #007bff, 0 0 0 5000px rgba(0,0,0,0.5); /* Fake overlay cutout */
+    pointer-events: none; /* Allow clicks through if needed, but usually we block */
+    background: white; /* Ensure visibility */
+    border-radius: 4px;
+}
+
+body.dark-mode .tour-highlight {
+    background: #2d2d2d;
+}
+
+.tour-box {
+    position: absolute;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    z-index: 2002;
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .tour-box {
+    background: #333;
+    color: white;
+}
+
+.tour-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.tour-controls button.small {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+}

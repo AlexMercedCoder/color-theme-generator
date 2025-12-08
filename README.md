@@ -26,6 +26,8 @@ A single-page web application that generates random website themes (color palett
 - **Keyboard Shortcuts**: Generate (Space), Undo (Ctrl+Z), and more.
 - **Gradient Generator**: Create beautiful CSS gradients from your palette.
 - **App Dark Mode**: Toggle the generator's interface between light and dark.
+- **Theme Naming**: Automatically generates creative names (e.g., "Vibrant Blue Essence") for your themes.
+- **Auto-fix Contrast**: One-click magic wand to adjust text color for WCAG compliance.
 - **LLM Ready**: One-click copy for JSON data and a structured prompt for AI coding assistants.
 
 ## Usage

@@ -143,6 +143,12 @@ function setupEventListeners() {
     // Phase 6 Listeners
     document.getElementById('magic-keyword').addEventListener('change', generateFromKeyword);
 
+    // Phase 7 Listeners
+    document.getElementById('tour-btn').addEventListener('click', startTour);
+    document.getElementById('tour-next').addEventListener('click', nextTourStep);
+    document.getElementById('tour-skip').addEventListener('click', endTour);
+    document.getElementById('fix-contrast-btn').addEventListener('click', fixContrast);
+
     setupSnippetInteractions();
     renderPreviewLayout(); // Fix: Ensure preview is rendered on load
 
@@ -383,9 +389,28 @@ function updateUI(skipHistory = false) {
     updatePreview();
     updateOutputs();
     renderSwatches();
-    updateHash();
-    checkContrast();
+    updatePreview();
+    updateCodeOutput();
     updateHistoryButtons();
+    updateThemeName(); // Phase 7
+
+    // Accessibility Check
+    const ratio = checkContrast(state.colors.background, state.colors.text);
+    const badge = document.getElementById('contrast-badge');
+    const ratioText = document.getElementById('contrast-ratio');
+    const fixBtn = document.getElementById('fix-contrast-btn'); // Phase 7
+
+    ratioText.textContent = ratio.toFixed(2);
+    if (ratio >= 4.5) {
+        badge.textContent = 'Pass (AA)';
+        badge.className = 'badge pass';
+        fixBtn.style.display = 'none';
+    } else {
+        badge.textContent = 'Fail';
+        badge.className = 'badge fail';
+        fixBtn.style.display = 'inline-block';
+    }
+    updateHash();
     updateTabs();
     updateGradient();
     updateFontUI();
@@ -573,12 +598,70 @@ function renderPreviewLayout() {
 function updateVisionFilter() {
     const filter = state.visionFilter;
     if (filter === 'normal') {
-        previewFrame.style.filter = 'none';
-    } else {
-        previewFrame.style.filter = `url(#${filter})`;
+        document.body.style.filter = 'none';
+    } else if (filter === 'protanopia') {
+        document.body.style.filter = 'url(#protanopia)'; // We would need SVG filters for this
+        // For now, let's just simulate with CSS if possible, or skip.
+        // A simple approximation for red-green blindness:
+        // This is hard to do with just CSS filters without SVG.
+        // Let's leave it as a placeholder or implement SVG filters later.
     }
 }
 
+function updateCodeOutput() {
+    const output = document.getElementById('code-output');
+    const tab = state.activeTab;
+
+    if (tab === 'json') {
+        output.value = JSON.stringify(state.colors, null, 4);
+    } else if (tab === 'css') {
+        let css = ':root {\n';
+        for (const [key, value] of Object.entries(state.colors)) {
+            css += `    --${key}: ${value};\n`;
+        }
+        css += `    --heading-font: "${state.fonts.headingFont}", sans-serif;\n`;
+        css += `    --body-font: "${state.fonts.bodyFont}", sans-serif;\n`;
+        css += '}';
+        output.value = css;
+    } else if (tab === 'scss') {
+        let scss = '';
+        for (const [key, value] of Object.entries(state.colors)) {
+            scss += `$${key}: ${value};\n`;
+        }
+        scss += `$heading-font: "${state.fonts.headingFont}", sans-serif;\n`;
+        scss += `$body-font: "${state.fonts.bodyFont}", sans-serif;`;
+        output.value = scss;
+    } else if (tab === 'tailwind') {
+        output.value = `module.exports = {
+  theme: {
+    extend: {
+      colors: {
+${Object.entries(state.colors).map(([k, v]) => `        ${k}: '${v}'`).join(',\n')}
+      },
+      fontFamily: {
+        heading: ['"${state.fonts.headingFont}"', 'sans-serif'],
+        body: ['"${state.fonts.bodyFont}"', 'sans-serif'],
+      }
+    }
+  }
+}`;
+    } else if (tab === 'tokens') {
+        // Design Tokens (W3C format draft approximation)
+        const tokens = {
+            color: {},
+            font: {
+                family: {
+                    heading: { value: state.fonts.headingFont, type: "fontFamily" },
+                    body: { value: state.fonts.bodyFont, type: "fontFamily" }
+                }
+            }
+        };
+        for (const [key, value] of Object.entries(state.colors)) {
+            tokens.color[key] = { value: value, type: "color" };
+        }
+        output.value = JSON.stringify(tokens, null, 4);
+    }
+}
 function loadFonts(fonts) {
     const linkId = 'dynamic-fonts';
     let link = document.getElementById(linkId);
@@ -1098,13 +1181,8 @@ function loadFromHash() {
 }
 
 // Accessibility
-function checkContrast() {
-    const bg = state.colors.background;
-    const txt = state.colors.text;
-    const ratio = getContrastRatio(bg, txt);
-    
-    contrastBadge.innerText = `Contrast: ${ratio.toFixed(2)}`;
-    contrastBadge.className = 'badge ' + (ratio >= 4.5 ? 'pass' : 'fail');
+function checkContrast(c1, c2) {
+    return getContrastRatio(c1, c2);
 }
 
 function getContrastRatio(c1, c2) {
@@ -1181,6 +1259,169 @@ if ('serviceWorker' in navigator) {
             .then(reg => console.log('Service Worker Registered'))
             .catch(err => console.log('Service Worker Error:', err));
     });
+}
+
+// Theme Naming Logic
+function generateThemeName(colors) {
+    const primary = colors.primary;
+    const hsl = hexToHsl(primary);
+    const h = hsl[0];
+    const s = hsl[1];
+    const l = hsl[2];
+
+    let hueName = '';
+    if (h >= 350 || h < 10) hueName = 'Red';
+    else if (h >= 10 && h < 45) hueName = 'Orange';
+    else if (h >= 45 && h < 70) hueName = 'Yellow';
+    else if (h >= 70 && h < 150) hueName = 'Green';
+    else if (h >= 150 && h < 190) hueName = 'Cyan';
+    else if (h >= 190 && h < 250) hueName = 'Blue';
+    else if (h >= 250 && h < 290) hueName = 'Purple';
+    else if (h >= 290 && h < 350) hueName = 'Pink';
+
+    let adj = '';
+    if (l < 20) adj = 'Midnight';
+    else if (l < 40) adj = 'Deep';
+    else if (l > 80) adj = 'Pale';
+    else if (s < 20) adj = 'Muted';
+    else if (s > 80) adj = 'Vibrant';
+    else adj = 'Classic';
+
+    // Random noun for flair
+    const nouns = ['Essence', 'Vibe', 'Flow', 'Spark', 'Wave', 'Glow', 'Aura', 'Spirit'];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+
+    return `${adj} ${hueName} ${noun}`;
+}
+
+function updateThemeName() {
+    const name = generateThemeName(state.colors);
+    document.getElementById('theme-name').textContent = name;
+}
+
+// Fix Contrast Logic
+function fixContrast() {
+    let text = state.colors.text;
+    const bg = state.colors.background;
+    let ratio = checkContrast(bg, text);
+    
+    if (ratio >= 4.5) {
+        showToast("Contrast is already good!");
+        return;
+    }
+
+    // Iteratively adjust lightness
+    let hsl = hexToHsl(text);
+    let l = hsl[2];
+    const bgL = getLuminance(bg);
+    
+    // If bg is dark, lighten text. If bg is light, darken text.
+    const direction = bgL < 0.5 ? 1 : -1;
+
+    for (let i = 0; i < 20; i++) { // Max 20 iterations
+        l += direction * 5;
+        if (l < 0) l = 0;
+        if (l > 100) l = 100;
+        
+        const newHex = hslToHex(hsl[0], hsl[1], l);
+        if (checkContrast(bg, newHex) >= 4.5) {
+            state.colors.text = newHex;
+            updateUI();
+            showToast("Contrast fixed!");
+            return;
+        }
+    }
+    showToast("Could not fully fix contrast (limit reached).");
+}
+
+// Tour Logic
+const tourSteps = [
+    { id: 'palette-mode', title: 'Palette Mode', desc: 'Choose a color harmony rule or keep it random.' },
+    { id: 'generate-btn', title: 'Generate', desc: 'Click here (or press Space) to create a new theme.' },
+    { id: 'color-swatches', title: 'Colors', desc: 'Click the lock icon to keep a color. Use sliders to tweak.' },
+    { id: 'vibe-sliders', title: 'Vibe Check', desc: 'Adjust the global saturation and brightness.' },
+    { id: 'preview-frame', title: 'Preview', desc: 'See your theme in action. Click elements to get code snippets!' },
+    { id: 'export-btn', title: 'Export', desc: 'Download your theme as a Brand Card or copy the code.' }
+];
+
+let currentTourStep = 0;
+
+function startTour() {
+    currentTourStep = 0;
+    document.getElementById('tour-overlay').style.display = 'block';
+    showTourStep();
+}
+
+function showTourStep() {
+    const step = tourSteps[currentTourStep];
+    const el = document.getElementById(step.id);
+    
+    // Highlight element
+    document.querySelectorAll('.tour-highlight').forEach(e => e.classList.remove('tour-highlight'));
+    if (el) el.classList.add('tour-highlight');
+
+    // Position box
+    const box = document.getElementById('tour-box');
+    const rect = el ? el.getBoundingClientRect() : { top: 100, left: 100, height: 0 };
+    
+    // Simple positioning logic (can be improved)
+    let top = rect.top + rect.height + 10;
+    let left = rect.left;
+    
+    if (top + 200 > window.innerHeight) top = rect.top - 220; // Flip up if too low
+    if (left + 300 > window.innerWidth) left = window.innerWidth - 320; // Shift left if too far right
+
+    box.style.top = `${top}px`;
+    box.style.left = `${left}px`;
+
+    document.getElementById('tour-title').textContent = step.title;
+    document.getElementById('tour-desc').textContent = step.desc;
+}
+
+function nextTourStep() {
+    currentTourStep++;
+    if (currentTourStep >= tourSteps.length) {
+        endTour();
+    } else {
+        showTourStep();
+    }
+}
+
+function endTour() {
+    document.getElementById('tour-overlay').style.display = 'none';
+    document.querySelectorAll('.tour-highlight').forEach(e => e.classList.remove('tour-highlight'));
+}
+
+// Helper: Hex to HSL (needed for naming and contrast fix)
+function hexToHsl(hex) {
+    let r = 0, g = 0, b = 0;
+    if (hex.length === 4) {
+        r = "0x" + hex[1] + hex[1];
+        g = "0x" + hex[2] + hex[2];
+        b = "0x" + hex[3] + hex[3];
+    } else if (hex.length === 7) {
+        r = "0x" + hex[1] + hex[2];
+        g = "0x" + hex[3] + hex[4];
+        b = "0x" + hex[5] + hex[6];
+    }
+    r /= 255; g /= 255; b /= 255;
+    let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b), delta = cmax - cmin;
+    let h = 0, s = 0, l = 0;
+
+    if (delta === 0) h = 0;
+    else if (cmax === r) h = ((g - b) / delta) % 6;
+    else if (cmax === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+
+    h = Math.round(h * 60);
+    if (h < 0) h += 360;
+
+    l = (cmax + cmin) / 2;
+    s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+    s = +(s * 100).toFixed(1);
+    l = +(l * 100).toFixed(1);
+
+    return [h, s, l];
 }
 
 // Start

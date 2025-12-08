@@ -96,5 +96,8 @@ The application is a fully installable Progressive Web App (PWA).
 - **Deep Linking**: URL hash state.
 
 ### Utilities
+### Utilities
 - **Gradient Generator**: Creates CSS gradients from the current palette.
 - **App Dark Mode**: Toggles the generator's UI theme.
+- **Theme Naming**: Algorithmic generation of descriptive names based on Hue, Saturation, and Lightness.
+- **Auto-fix Contrast**: Iterative algorithm that adjusts text lightness until it passes WCAG AA standards against the background.

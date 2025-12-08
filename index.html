@@ -11,8 +11,12 @@
 <body>
 
     <header>
-        <h1>ThemeGen</h1>
+        <div class="header-left">
+            <h1>ThemeGen</h1>
+            <span id="theme-name" class="theme-name-badge">Random Theme</span>
+        </div>
         <div class="header-controls">
+            <button id="tour-btn" class="icon-btn" title="Start Tour">❓</button>
             <button id="zen-mode-btn" class="icon-btn" title="Toggle Zen Mode">🧘</button>
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
             <button id="undo-btn" class="icon-btn" disabled title="Undo">↩</button>
@@ -66,7 +70,12 @@
             <hr>
             
             <div class="control-group">
-                <label>Current Colors <span id="contrast-badge" class="badge"></span></label>
+                <label>Current Colors</label>
+                <div class="accessibility-status">
+                    <span>Contrast Ratio: <strong id="contrast-ratio">--</strong></span>
+                    <span id="contrast-badge" class="badge">--</span>
+                    <button id="fix-contrast-btn" class="icon-btn small-btn" title="Auto-fix Contrast" style="display:none;">🪄</button>
+                </div>
                 <div id="color-swatches">
                     <!-- Swatches will go here -->
                 </div>
@@ -210,6 +219,17 @@
             </filter>
         </defs>
     </svg>
+
+    <!-- Tour Elements -->
+    <div id="tour-overlay" class="tour-overlay" style="display: none;"></div>
+    <div id="tour-box" class="tour-box" style="display: none;">
+        <h3 id="tour-title">Tour Title</h3>
+        <p id="tour-desc">Tour description goes here.</p>
+        <div class="tour-controls">
+            <button id="tour-skip" class="secondary-btn small">Skip</button>
+            <button id="tour-next" class="primary-btn small">Next</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
