@@ -44,7 +44,9 @@ The output panel supports multiple formats:
 - **CSS**: `:root` variables.
 - **SCSS**: SASS variables.
 - **Tailwind**: Configuration object.
-- **Brand Card**: Downloadable PNG image via Canvas API.
+- **Figma**: JSON tokens for Figma plugins.
+- **React**: Styled-components theme object.
+- **Brand Card**: Downloadable PNG image via Canvas API (Standard, Story, Post sizes).
 
 ### Keyboard Shortcuts
 - `Space`: Generate new theme.
@@ -57,6 +59,7 @@ A custom Toast notification system replaces browser alerts for non-intrusive fee
 
 ### Font Pairing
 Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`. Users can **Lock** fonts independently.
+**Custom Fonts**: Users can upload `.woff` or `.ttf` files, which are loaded via the `FontFace` API and applied to the theme.
 
 ### Typography Scale
 Users can select a modular scale (e.g., Major Third, Golden Ratio) which updates CSS variables (`--text-sm` to `--text-4xl`) to ensure harmonious font sizing.
@@ -68,6 +71,9 @@ The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that a
 - **Blog**: Typography focused.
 - **E-commerce**: Product grid.
 
+- **E-commerce**: Product grid.
+
+**View Transitions**: The View Transitions API is used to create smooth, animated transitions between theme states.
 **Smooth Transitions** are applied to CSS variables for a polished feel when changing themes.
 
 **Interactive Snippets**: Clicking on components in the preview (e.g., buttons, cards) opens a modal with the HTML code for that specific element.
@@ -87,8 +93,10 @@ The application is a fully installable Progressive Web App (PWA).
 - **Service Worker**: `sw.js` caches core assets (`index.html`, `styles.css`, `script.js`) for offline functionality.
 
 ### Accessibility Tools
-- **Contrast Checker**: WCAG ratio calculation.
+- **Contrast Checker**: WCAG ratio calculation with **Auto-Fix** capability.
 - **Color Blindness Simulator**: SVG filters to simulate Protanopia, Deuteranopia, Tritanopia, and Achromatopsia.
+- **Focus Ring**: Customizable focus indicators (color, style) for better keyboard navigation visibility.
+- **ARIA Snippets**: Generated HTML snippets include `role` and `aria-label` attributes.
 
 ### Persistence
 - **History**: Stack-based Undo/Redo.

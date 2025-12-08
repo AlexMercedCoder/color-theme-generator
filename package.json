@@ -1,0 +1,28 @@
+{
+  "name": "colortheme",
+  "version": "1.0.0",
+  "description": "A single-page web application that generates random website themes (color palettes + font pairings) and provides ready-to-use JSON and LLM prompts.",
+  "main": "fonts.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:unit": "jest",
+    "test:e2e": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlexMercedCoder/color-theme-generator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AlexMercedCoder/color-theme-generator/issues"
+  },
+  "homepage": "https://github.com/AlexMercedCoder/color-theme-generator#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "jest": "^30.2.0",
+    "jest-environment-jsdom": "^30.2.0"
+  }
+}

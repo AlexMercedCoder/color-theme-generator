@@ -28,6 +28,11 @@ A single-page web application that generates random website themes (color palett
 - **App Dark Mode**: Toggle the generator's interface between light and dark.
 - **Theme Naming**: Automatically generates creative names (e.g., "Vibrant Blue Essence") for your themes.
 - **Auto-fix Contrast**: One-click magic wand to adjust text color for WCAG compliance.
+- **Focus Ring Customization**: Style the focus indicators (color, style) to match your brand.
+- **ARIA-Ready Snippets**: Generated code includes accessibility attributes (roles, labels) by default.
+- **Advanced Exports**: Figma Tokens JSON and React Styled-Components theme objects.
+- **Custom Fonts**: Upload your own `.woff` or `.ttf` files to visualize them in the theme.
+- **View Transitions**: Smooth, animated transitions when regenerating themes (supported browsers).
 - **LLM Ready**: One-click copy for JSON data and a structured prompt for AI coding assistants.
 
 ## Usage

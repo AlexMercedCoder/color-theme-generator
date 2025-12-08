@@ -35,6 +35,10 @@ let state = {
         headingFont: "Roboto",
         bodyFont: "Open Sans"
     },
+    focusRing: {
+        color: '#3b82f6',
+        style: 'solid'
+    },
     locked: {},
     activeTab: 'json',
     darkMode: false,
@@ -62,7 +66,10 @@ let previewFrame, codeOutput, promptOutput, gradientOutput, gradientPreview, sha
 let generateBtn, saveThemeBtn, downloadBrandCardBtn, copyCodeBtn, copyPromptBtn, copyGradientBtn, copyLinkBtn;
 let undoBtn, redoBtn, themeToggleBtn, contrastBadge, tabBtns, previewLayoutSelect, visionSimulatorSelect;
 let savedThemesList, satSlider, brightSlider, lockHeadingBtn, lockBodyBtn, headingFontName, bodyFontName;
-let tourBtn, tourNextBtn, tourSkipBtn, fixContrastBtn, zenModeBtn, imageUpload, magicKeyword, typeScale;
+let tourBtn, tourNextBtn, tourSkipBtn, fixContrastBtn, zenModeBtn, exitZenBtn, imageUpload, magicKeyword, typeScale;
+let focusColorInput, focusStyleSelect;
+let brandCardSizeSelect;
+let fontUpload;
 
 // Initialization
 // Initialization
@@ -114,9 +121,15 @@ function initializeGlobals() {
     tourSkipBtn = document.getElementById('tour-skip');
     fixContrastBtn = document.getElementById('fix-contrast-btn');
     zenModeBtn = document.getElementById('zen-mode-btn');
+    exitZenBtn = document.getElementById('exit-zen-btn');
     imageUpload = document.getElementById('image-upload');
     magicKeyword = document.getElementById('magic-keyword');
     typeScale = document.getElementById('type-scale');
+    focusColorInput = document.getElementById('focus-color');
+    focusStyleSelect = document.getElementById('focus-style');
+    focusStyleSelect = document.getElementById('focus-style');
+    brandCardSizeSelect = document.getElementById('brand-card-size');
+    fontUpload = document.getElementById('font-upload');
 }
 
 function setupEventListeners() {
@@ -175,6 +188,11 @@ function setupEventListeners() {
     tourNextBtn.addEventListener('click', nextTourStep);
     tourSkipBtn.addEventListener('click', endTour);
     fixContrastBtn.addEventListener('click', fixContrast);
+    exitZenBtn.addEventListener('click', toggleZenMode);
+    
+    focusColorInput.addEventListener('input', updateFocusRing);
+    focusStyleSelect.addEventListener('change', updateFocusRing);
+    fontUpload.addEventListener('change', handleFontUpload);
 
     setupSnippetInteractions();
     renderPreviewLayout(); // Fix: Ensure preview is rendered on load
@@ -408,6 +426,16 @@ function applyVibe() {
 
 // UI Updates
 function updateUI(skipHistory = false) {
+    if (!document.startViewTransition) {
+        performUIUpdate(skipHistory);
+        return;
+    }
+    document.startViewTransition(() => {
+        performUIUpdate(skipHistory);
+    });
+}
+
+function performUIUpdate(skipHistory) {
     if (!skipHistory && !isNavigatingHistory) {
         addToHistory();
         // Update base colors for vibe check whenever we commit a new state
@@ -416,8 +444,7 @@ function updateUI(skipHistory = false) {
     updatePreview();
     updateOutputs(); // Consolidated function
     renderSwatches();
-    updatePreview();
-    // updateCodeOutput(); // Removed duplicate call
+    // updatePreview(); // Removed duplicate call
     updateHistoryButtons();
     updateThemeName(); // Phase 7
 
@@ -427,15 +454,17 @@ function updateUI(skipHistory = false) {
     const ratioText = document.getElementById('contrast-ratio');
     const fixBtn = document.getElementById('fix-contrast-btn'); // Phase 7
 
-    ratioText.textContent = ratio.toFixed(2);
-    if (ratio >= 4.5) {
-        badge.textContent = 'Pass (AA)';
-        badge.className = 'badge pass';
-        fixBtn.style.display = 'none';
-    } else {
-        badge.textContent = 'Fail';
-        badge.className = 'badge fail';
-        fixBtn.style.display = 'inline-block';
+    if (ratioText) ratioText.textContent = ratio.toFixed(2);
+    if (badge && fixBtn) {
+        if (ratio >= 4.5) {
+            badge.textContent = 'Pass (AA)';
+            badge.className = 'badge pass';
+            fixBtn.style.display = 'none';
+        } else {
+            badge.textContent = 'Fail';
+            badge.className = 'badge fail';
+            fixBtn.style.display = 'inline-block';
+        }
     }
     // updateHash(); // Moved to updateOutputs
     updateTabs();
@@ -497,6 +526,7 @@ function renderSwatches() {
 }
 
 function updateFontUI() {
+    if (!headingFontName || !bodyFontName) return; // Safety check
     headingFontName.innerText = state.fonts.headingFont;
     bodyFontName.innerText = state.fonts.bodyFont;
     
@@ -651,6 +681,7 @@ function loadFonts(fonts) {
 }
 
 function updateTabs() {
+    if (!tabBtns) return; // Safety check
     tabBtns.forEach(btn => {
         if (btn.dataset.tab === state.activeTab) {
             btn.classList.add('active');
@@ -698,6 +729,25 @@ ${Object.entries(state.colors).map(([k, v]) => `        ${k}: '${v}'`).join(',\n
     }
   }
 }`;
+    } else if (tab === 'figma') {
+        // Figma Tokens (Simplified)
+        const tokens = {};
+        for (const [key, value] of Object.entries(state.colors)) {
+            tokens[key] = { value: value, type: 'color' };
+        }
+        tokens['font-heading'] = { value: state.fonts.headingFont, type: 'fontFamilies' };
+        tokens['font-body'] = { value: state.fonts.bodyFont, type: 'fontFamilies' };
+        output.value = JSON.stringify(tokens, null, 4);
+    } else if (tab === 'react') {
+        // React Theme Object
+        const theme = {
+            colors: state.colors,
+            fonts: {
+                heading: state.fonts.headingFont,
+                body: state.fonts.bodyFont
+            }
+        };
+        output.value = `export const theme = ${JSON.stringify(theme, null, 4)};`;
     } else if (tab === 'tokens') {
         const tokens = {
             color: {},
@@ -747,6 +797,7 @@ Return clean semantic HTML, modern CSS, and sample content.`;
 }
 
 function updateGradient() {
+    if (!gradientPreview || !gradientOutput) return; // Safety check
     const gradient = `linear-gradient(135deg, ${state.colors.primary}, ${state.colors.secondary})`;
     gradientPreview.style.background = gradient;
     gradientOutput.value = `background: ${gradient};`;
@@ -776,10 +827,22 @@ function showToast(message) {
 
 // Brand Card Export
 function downloadBrandCard() {
+    const select = brandCardSizeSelect || document.getElementById('brand-card-size');
+    const size = select ? select.value : 'standard';
     const canvas = document.createElement('canvas');
-    canvas.width = 800;
-    canvas.height = 600;
-    const ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d');
+
+    // Dimensions
+    if (size === 'story') {
+        canvas.width = 1080;
+        canvas.height = 1920;
+    } else if (size === 'post') {
+        canvas.width = 1080;
+        canvas.height = 1080;
+    } else {
+        canvas.width = 800;
+        canvas.height = 600;
+    }
 
     // Background
     ctx.fillStyle = state.colors.background;
@@ -787,46 +850,57 @@ function downloadBrandCard() {
 
     // Title
     ctx.fillStyle = state.colors.text;
-    ctx.font = `bold 40px sans-serif`;
-    ctx.fillText("Brand Theme", 50, 80);
+    ctx.textAlign = 'center';
+    ctx.font = `bold ${canvas.width * 0.05}px sans-serif`;
+    ctx.fillText("Brand Theme", canvas.width / 2, canvas.height * 0.1);
 
     // Fonts
-    ctx.font = `24px sans-serif`;
-    ctx.fillText(`Heading: ${state.fonts.headingFont}`, 50, 140);
-    ctx.fillText(`Body: ${state.fonts.bodyFont}`, 50, 180);
+    ctx.font = `${canvas.width * 0.03}px sans-serif`;
+    ctx.fillText(`Heading: ${state.fonts.headingFont}`, canvas.width / 2, canvas.height * 0.15);
+    ctx.fillText(`Body: ${state.fonts.bodyFont}`, canvas.width / 2, canvas.height * 0.19);
 
     // Swatches
     const colors = Object.entries(state.colors);
-    const swatchWidth = 100;
-    const swatchHeight = 100;
-    const startX = 50;
-    const startY = 250;
+    const swatchSize = canvas.width * 0.15;
+    const gap = canvas.width * 0.05;
+    
+    // Calculate Grid
+    let cols = 3;
+    if (size === 'story') cols = 2;
+    
+    const totalWidth = cols * swatchSize + (cols - 1) * gap;
+    const startX = (canvas.width - totalWidth) / 2;
+    const startY = canvas.height * 0.3;
 
     colors.forEach((color, index) => {
         const [name, hex] = color;
-        const x = startX + (index % 3) * 220;
-        const y = startY + Math.floor(index / 3) * 150;
+        const col = index % cols;
+        const row = Math.floor(index / cols);
+        
+        const x = startX + col * (swatchSize + gap);
+        const y = startY + row * (swatchSize + gap + 60);
 
         // Swatch Rect
         ctx.fillStyle = hex;
-        ctx.fillRect(x, y, swatchWidth, swatchHeight);
+        ctx.fillRect(x, y, swatchSize, swatchSize);
         
         // Label
         ctx.fillStyle = state.colors.text;
-        ctx.font = "16px sans-serif";
-        ctx.fillText(name, x, y + swatchHeight + 25);
-        ctx.fillText(hex, x, y + swatchHeight + 45);
+        ctx.textAlign = 'center';
+        ctx.font = `${canvas.width * 0.025}px sans-serif`;
+        ctx.fillText(name, x + swatchSize / 2, y + swatchSize + 25);
+        ctx.fillText(hex, x + swatchSize / 2, y + swatchSize + 50);
     });
 
     // Footer
     ctx.fillStyle = state.colors.text;
-    ctx.font = "14px sans-serif";
+    ctx.font = `${canvas.width * 0.02}px sans-serif`;
     ctx.globalAlpha = 0.5;
-    ctx.fillText("Generated by ThemeGen", 50, 550);
+    ctx.fillText("Generated by ThemeGen", canvas.width / 2, canvas.height * 0.95);
 
     // Download
     const link = document.createElement('a');
-    link.download = 'brand-card.png';
+    link.download = `brand-card-${size}.png`;
     link.href = canvas.toDataURL();
     link.click();
 }
@@ -865,6 +939,7 @@ function redo() {
 }
 
 function updateHistoryButtons() {
+    if (!undoBtn || !redoBtn) return; // Safety check
     undoBtn.disabled = historyIndex <= 0;
     redoBtn.disabled = historyIndex >= history.length - 1;
 }
@@ -963,13 +1038,21 @@ function toggleZenMode() {
     document.getElementById('exit-zen-btn').style.display = isZen ? 'block' : 'none';
 }
 
-// Add listener for exit button
-document.getElementById('exit-zen-btn').addEventListener('click', toggleZenMode);
+
 
 // Type Scale
 function updateTypeScale() {
     const scale = document.getElementById('type-scale').value;
     document.documentElement.style.setProperty('--scale-ratio', scale);
+}
+
+// Focus Ring
+function updateFocusRing() {
+    state.focusRing.color = focusColorInput.value;
+    state.focusRing.style = focusStyleSelect.value;
+    
+    document.documentElement.style.setProperty('--focus-ring-color', state.focusRing.color);
+    document.documentElement.style.setProperty('--focus-ring-style', state.focusRing.style);
 }
 
 // Image to Theme
@@ -1011,6 +1094,35 @@ function handleImageUpload(e) {
         }
         img.src = event.target.result;
     }
+    reader.readAsDataURL(file);
+}
+
+// Custom Font Upload
+async function handleFontUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const fontName = 'CustomFont';
+    const reader = new FileReader();
+
+    reader.onload = async (event) => {
+        try {
+            const fontData = event.target.result;
+            const fontFace = new FontFace(fontName, `url(${fontData})`);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+            
+            // Update State
+            state.fonts.headingFont = fontName;
+            state.fonts.bodyFont = fontName;
+            
+            updateUI();
+            showToast('Custom font loaded!');
+        } catch (err) {
+            console.error(err);
+            showToast('Error loading font.');
+        }
+    };
     reader.readAsDataURL(file);
 }
 
@@ -1108,6 +1220,30 @@ function showSnippetModal(element) {
     const clone = element.cloneNode(true);
     clone.classList.remove('interactive-element');
     
+    // Add ARIA attributes
+    if (clone.tagName === 'BUTTON' || clone.classList.contains('preview-btn')) {
+        if (!clone.hasAttribute('aria-label')) {
+            clone.setAttribute('aria-label', clone.innerText.trim() || 'Button');
+        }
+    }
+    if (clone.tagName === 'NAV') {
+        clone.setAttribute('role', 'navigation');
+        clone.setAttribute('aria-label', 'Main');
+    }
+    if (clone.classList.contains('preview-card') || clone.classList.contains('product-card')) {
+        clone.setAttribute('role', 'article');
+    }
+    if (clone.tagName === 'HEADER') {
+        clone.setAttribute('role', 'banner');
+    }
+    if (clone.tagName === 'FOOTER') {
+        clone.setAttribute('role', 'contentinfo');
+    }
+    if (clone.classList.contains('dashboard-sidebar')) {
+        clone.setAttribute('role', 'complementary');
+        clone.setAttribute('aria-label', 'Sidebar');
+    }
+    
     // Get computed styles that are relevant (simplified)
     // In a real app, we might have pre-defined snippets. 
     // Here we will just show the HTML structure.
@@ -1115,7 +1251,7 @@ function showSnippetModal(element) {
     let snippet = clone.outerHTML;
     
     // Prettify simple
-    snippet = snippet.replace(/></g, '>\n<');
+    snippet = snippet.replace(/>\s*</g, '>\n<');
     
     codeArea.value = snippet;
     modal.style.display = 'block';
@@ -1156,7 +1292,7 @@ function updateHash() {
     
     const hash = params.toString();
     window.location.hash = hash;
-    shareLinkInput.value = window.location.href;
+    if (shareLinkInput) shareLinkInput.value = window.location.href;
 }
 
 function loadFromHash() {
@@ -1177,6 +1313,8 @@ function loadFromHash() {
 function checkContrast(c1, c2) {
     return getContrastRatio(c1, c2);
 }
+
+
 
 function getContrastRatio(c1, c2) {
     const lum1 = getLuminance(c1);
@@ -1301,38 +1439,40 @@ function updateThemeName() {
 }
 
 // Fix Contrast Logic
-function fixContrast() {
-    let text = state.colors.text;
-    const bg = state.colors.background;
+function getContrastFix(bg, text) {
     let ratio = checkContrast(bg, text);
-    
-    if (ratio >= 4.5) {
-        showToast("Contrast is already good!");
-        return;
-    }
+    if (ratio >= 4.5) return text;
 
-    // Iteratively adjust lightness
     let hsl = hexToHsl(text);
-    let l = hsl.l;
-    const bgL = getLuminance(bg);
-    
-    // If bg is dark, lighten text. If bg is light, darken text.
-    const direction = bgL < 0.5 ? 1 : -1;
+    const bgHsl = hexToHsl(bg);
+    const step = bgHsl.l < 50 ? 5 : -5;
+    let safety = 0;
 
-    for (let i = 0; i < 20; i++) { // Max 20 iterations
-        l += direction * 5;
-        if (l < 0) l = 0;
-        if (l > 100) l = 100;
+    while (ratio < 4.5 && safety < 20) {
+        hsl.l += step;
+        if (hsl.l < 0) hsl.l = 0;
+        if (hsl.l > 100) hsl.l = 100;
         
-        const newHex = hslToHex(hsl.h, hsl.s, l);
-        if (checkContrast(bg, newHex) >= 4.5) {
-            state.colors.text = newHex;
-            updateUI();
-            showToast("Contrast fixed!");
-            return;
-        }
+        text = hslToHex(hsl.h, hsl.s, hsl.l);
+        ratio = checkContrast(bg, text);
+        safety++;
     }
-    showToast("Could not fully fix contrast (limit reached).");
+    return text;
+}
+
+function fixContrast() {
+    const bg = state.colors.background;
+    const text = state.colors.text;
+    const newText = getContrastFix(bg, text);
+    
+    if (newText !== text) {
+        state.colors.text = newText;
+        if(state.baseColors) state.baseColors.text = newText;
+        updateUI();
+        showToast('Contrast fixed!');
+    } else {
+        showToast('Contrast is already good or could not be fixed.');
+    }
 }
 
 // Tour Logic
@@ -1404,8 +1544,24 @@ window.onerror = function(msg, url, line, col, error) {
 };
 
 // Start
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
+if (typeof module === 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+}
+
+// Export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        hexToHsl,
+        checkContrast,
+        generateThemeName,
+        getContrastFix,
+        updateOutputs,
+        downloadBrandCard,
+        updateUI,
+        state
+    };
 }

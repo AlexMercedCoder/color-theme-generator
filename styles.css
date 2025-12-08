@@ -7,12 +7,21 @@
     --text: #000000;
     --heading-font: 'Roboto', sans-serif;
     --body-font: 'Open Sans', sans-serif;
+    --scale-ratio: 1.25;
+    
+    --focus-ring-color: #3b82f6;
+    --focus-ring-style: solid;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+}
+
+*:focus-visible {
+    outline: 3px var(--focus-ring-style) var(--focus-ring-color);
+    outline-offset: 2px;
 }
 
 body {

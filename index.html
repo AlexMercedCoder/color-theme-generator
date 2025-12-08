@@ -43,18 +43,31 @@
             </div>
 
             <div class="control-group">
-                <label>Magic Keyword</label>
-                <input type="text" id="magic-keyword" placeholder="e.g. Fire, Ocean, Forest">
-            </div>
-
-            <div class="control-group">
                 <label>Image to Theme</label>
                 <input type="file" id="image-upload" accept="image/*" style="width: 100%;">
             </div>
 
+            <div class="control-group">
+                <label>Magic Keyword</label>
+                <input type="text" id="magic-keyword" placeholder="e.g. Fire, Ocean, Forest">
+            </div>
+
+            </div>
+
             <button id="generate-btn" class="primary-btn">Generate New Theme</button>
             <button id="save-theme-btn" class="secondary-btn" style="margin-top: 0.5rem;">Save Current Theme</button>
-            <button id="download-brand-card-btn" class="secondary-btn" style="margin-top: 0.5rem;">Download Brand Card</button>
+            
+            <div class="control-group" style="margin-top: 0.5rem;">
+                <label>Brand Card</label>
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <select id="brand-card-size" style="flex: 1;">
+                        <option value="standard">Standard (800x600)</option>
+                        <option value="story">Instagram Story (1080x1920)</option>
+                        <option value="post">Social Post (1080x1080)</option>
+                    </select>
+                </div>
+                <button id="download-brand-card-btn" class="secondary-btn" style="width: 100%;">Download Brand Card</button>
+            </div>
             
             <hr>
 
@@ -74,10 +87,10 @@
             
             <div class="control-group">
                 <label>Current Colors</label>
-                <div class="accessibility-status">
-                    <span>Contrast Ratio: <strong id="contrast-ratio">--</strong></span>
+                <div class="contrast-checker">
+                    <span>Contrast Ratio: <span id="contrast-ratio">--</span></span>
                     <span id="contrast-badge" class="badge">--</span>
-                    <button id="fix-contrast-btn" class="icon-btn small-btn" title="Auto-fix Contrast" style="display:none;">🪄</button>
+                    <button id="fix-contrast-btn" class="btn-small" style="display: none;" title="Auto-fix contrast">Auto-Fix</button>
                 </div>
                 <div id="color-swatches">
                     <!-- Swatches will go here -->
@@ -112,6 +125,10 @@
                         <option value="1.5">Perfect Fifth (1.500)</option>
                         <option value="1.618">Golden Ratio (1.618)</option>
                     </select>
+                </div>
+                <div class="control-group" style="margin-top: 0.5rem;">
+                    <label>Custom Font (WOFF/TTF)</label>
+                    <input type="file" id="font-upload" accept=".woff,.woff2,.ttf,.otf">
                 </div>
             </div>
 
@@ -148,6 +165,18 @@
                 <div id="preview-frame" class="layout-landing">
                     <!-- Content injected by JS based on layout -->
                 </div>
+                <div class="control-group">
+                    <label>Focus Ring</label>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <input type="color" id="focus-color" value="#3b82f6">
+                        <select id="focus-style">
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                            <option value="double">Double</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -161,7 +190,8 @@
                     <button class="tab-btn" data-tab="css">CSS</button>
                     <button class="tab-btn" data-tab="scss">SCSS</button>
                     <button class="tab-btn" data-tab="tailwind">Tailwind</button>
-                    <button class="tab-btn" data-tab="tokens">Tokens</button>
+                    <button class="tab-btn" data-tab="figma">Figma</button>
+                    <button class="tab-btn" data-tab="react">React</button>
                 </div>
                 <textarea id="code-output" readonly></textarea>
                 <button id="copy-code-btn" class="secondary-btn">Copy Code</button>
