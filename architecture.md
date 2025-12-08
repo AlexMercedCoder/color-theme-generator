@@ -58,6 +58,9 @@ A custom Toast notification system replaces browser alerts for non-intrusive fee
 ### Font Pairing
 Randomly selects a Heading and Body font from the `googleFonts` array in `fonts.js`. Users can **Lock** fonts independently.
 
+### Typography Scale
+Users can select a modular scale (e.g., Major Third, Golden Ratio) which updates CSS variables (`--text-sm` to `--text-4xl`) to ensure harmonious font sizing.
+
 ### Preview System
 The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that are updated in real-time by JavaScript. It supports multiple layouts:
 - **Landing Page**: Standard hero + content.
@@ -66,6 +69,14 @@ The preview area uses CSS Variables (`--primary`, `--heading-font`, etc.) that a
 - **E-commerce**: Product grid.
 
 **Smooth Transitions** are applied to CSS variables for a polished feel when changing themes.
+
+**Interactive Snippets**: Clicking on components in the preview (e.g., buttons, cards) opens a modal with the HTML code for that specific element.
+
+### Image to Theme
+Uses the Canvas API to analyze an uploaded image. It samples pixels, calculates frequency, and uses a simple clustering algorithm (based on Euclidean distance in RGB space) to extract 6 distinct dominant colors, which are then mapped to the theme palette based on luminance.
+
+### Zen Mode
+Toggles a class on the `<body>` that hides all panels except the preview area, allowing for distraction-free viewing.
 
 ### Accessibility Tools
 - **Contrast Checker**: WCAG ratio calculation.

@@ -8,6 +8,10 @@ A single-page web application that generates random website themes (color palett
 - **Vibe Check**: Real-time Saturation and Brightness sliders to adjust the whole palette.
 - **Multi-Format Export**: Get your theme in JSON, CSS Variables, SCSS, or Tailwind Config.
 - **Brand Card**: Download a professional PNG image of your theme for sharing.
+- **Image to Theme**: Upload an image to automatically extract a matching color palette.
+- **Typography Scale**: Ensure perfect font sizing with modular scales (Golden Ratio, Major Third, etc.).
+- **Zen Mode**: Hide all distractions and focus purely on your theme.
+- **Component Snippets**: Click any element in the preview to get its exact HTML/CSS code.
 - **Live Preview**: See your theme applied instantly to a realistic mini-webpage.
 - **Multiple Layouts**: Preview on Landing Page, Dashboard, Blog, or E-commerce layouts.
 - **Manual Tweaking**: Fine-tune individual colors with pickers.
@@ -24,14 +28,18 @@ A single-page web application that generates random website themes (color palett
 ## Usage
 1. Open `index.html` in your browser.
 2. Select a **Palette Mode** (or leave as Random).
-3. Click **Generate New Theme** (or press Space).
-4. **Lock** any colors or fonts you like.
-5. Use **Vibe Sliders** to adjust saturation and brightness.
-6. Switch **Preview Layouts** to see how it looks in different contexts.
-7. Use the **Vision Simulator** to ensure accessibility.
-8. Click **Save Current Theme** to keep it for later.
-9. Click **Download Brand Card** to share your theme.
-10. Select your preferred output format (JSON/CSS/SCSS/Tailwind) and copy.
+3. **Upload an Image** to generate a theme from it (optional).
+4. Click **Generate New Theme** (or press Space).
+5. **Lock** any colors or fonts you like.
+6. Use **Vibe Sliders** to adjust saturation and brightness.
+7. Select a **Typography Scale** to adjust font sizing.
+8. Switch **Preview Layouts** to see how it looks in different contexts.
+9. Click any element in the preview to **Copy Snippet**.
+10. Toggle **Zen Mode** (🧘) for a cleaner view.
+11. Use the **Vision Simulator** to ensure accessibility.
+12. Click **Save Current Theme** to keep it for later.
+13. Click **Download Brand Card** to share your theme.
+14. Select your preferred output format (JSON/CSS/SCSS/Tailwind) and copy.
 
 ## Installation
 No installation required! This is a static site.

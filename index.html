@@ -12,6 +12,7 @@
     <header>
         <h1>ThemeGen</h1>
         <div class="header-controls">
+            <button id="zen-mode-btn" class="icon-btn" title="Toggle Zen Mode">🧘</button>
             <button id="theme-toggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
             <button id="undo-btn" class="icon-btn" disabled title="Undo">↩</button>
             <button id="redo-btn" class="icon-btn" disabled title="Redo">↪</button>
@@ -31,6 +32,11 @@
                     <option value="complementary">Complementary</option>
                     <option value="triadic">Triadic</option>
                 </select>
+            </div>
+
+            <div class="control-group">
+                <label>Image to Theme</label>
+                <input type="file" id="image-upload" accept="image/*" style="width: 100%;">
             </div>
 
             <button id="generate-btn" class="primary-btn">Generate New Theme</button>
@@ -77,6 +83,17 @@
                         <span id="body-font-name">Open Sans</span>
                         <button class="lock-btn" id="lock-body-btn" title="Lock Body Font">🔓</button>
                     </div>
+                </div>
+                <div class="font-control" style="margin-top: 0.5rem;">
+                    <label>Type Scale</label>
+                    <select id="type-scale">
+                        <option value="1.2">Minor Third (1.200)</option>
+                        <option value="1.25" selected>Major Third (1.250)</option>
+                        <option value="1.333">Perfect Fourth (1.333)</option>
+                        <option value="1.414">Augmented Fourth (1.414)</option>
+                        <option value="1.5">Perfect Fifth (1.500)</option>
+                        <option value="1.618">Golden Ratio (1.618)</option>
+                    </select>
                 </div>
             </div>
 
@@ -157,6 +174,17 @@
     </footer>
 
     <div id="toast-container"></div>
+
+    <!-- Code Snippet Modal -->
+    <div id="snippet-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3>Component Code</h3>
+            <p>Copy this code to use this component with your theme.</p>
+            <textarea id="snippet-code" readonly></textarea>
+            <button id="copy-snippet-btn" class="primary-btn">Copy Snippet</button>
+        </div>
+    </div>
 
     <!-- SVG Filters for Color Blindness -->
     <svg style="display: none;">

@@ -135,6 +135,14 @@ function setupEventListeners() {
     lockHeadingBtn.addEventListener('click', () => toggleLock('headingFont'));
     lockBodyBtn.addEventListener('click', () => toggleLock('bodyFont'));
 
+    // Phase 5 Listeners
+    document.getElementById('image-upload').addEventListener('change', handleImageUpload);
+    document.getElementById('type-scale').addEventListener('change', updateTypeScale);
+    document.getElementById('zen-mode-btn').addEventListener('click', toggleZenMode);
+    
+    setupSnippetInteractions();
+    renderPreviewLayout(); // Fix: Ensure preview is rendered on load
+
     // Keyboard Shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -857,6 +865,192 @@ function toggleDarkMode() {
     document.body.classList.toggle('dark-mode', state.darkMode);
     themeToggleBtn.innerText = state.darkMode ? '☀️' : '🌙';
 }
+
+
+
+// Zen Mode
+function toggleZenMode() {
+    document.body.classList.toggle('zen-mode');
+}
+
+// Type Scale
+function updateTypeScale() {
+    const scale = document.getElementById('type-scale').value;
+    document.documentElement.style.setProperty('--scale-ratio', scale);
+}
+
+// Image to Theme
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const colors = extractColors(imageData);
+            
+            if (colors.length >= 6) {
+                // Map extracted colors to state
+                // We'll try to map them somewhat intelligently based on brightness
+                colors.sort((a, b) => getLuminance(b) - getLuminance(a)); // Lightest to Darkest
+                
+                // Assign based on typical usage
+                state.colors.background = colors[0]; // Lightest
+                state.colors.surface = colors[1];
+                state.colors.secondary = colors[2];
+                state.colors.primary = colors[3];
+                state.colors.accent = colors[4];
+                state.colors.text = colors[5]; // Darkest
+                
+                updateUI();
+                showToast('Theme generated from image!');
+            } else {
+                showToast('Could not extract enough colors.');
+            }
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(file);
+}
+
+function extractColors(data) {
+    const colorMap = {};
+    for (let i = 0; i < data.length; i += 4 * 100) { // Sample every 100th pixel for performance
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        
+        if (a < 128) continue; // Skip transparent
+        
+        const hex = rgbToHex(r, g, b);
+        if (!colorMap[hex]) colorMap[hex] = 0;
+        colorMap[hex]++;
+    }
+    
+    // Sort by frequency
+    const sortedColors = Object.entries(colorMap)
+        .sort((a, b) => b[1] - a[1])
+        .map(entry => entry[0]);
+        
+    // Filter similar colors to get distinct palette
+    const distinctColors = [];
+    for (const color of sortedColors) {
+        if (distinctColors.length >= 6) break;
+        let isDistinct = true;
+        for (const existing of distinctColors) {
+            if (getColorDifference(color, existing) < 50) { // Threshold for difference
+                isDistinct = false;
+                break;
+            }
+        }
+        if (isDistinct) distinctColors.push(color);
+    }
+    
+    // Fill if not enough
+    while (distinctColors.length < 6) {
+        distinctColors.push(getRandomHex());
+    }
+    
+    return distinctColors;
+}
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+function getColorDifference(hex1, hex2) {
+    const rgb1 = hexToRgb(hex1);
+    const rgb2 = hexToRgb(hex2);
+    return Math.sqrt(
+        Math.pow(rgb1[0] - rgb2[0], 2) +
+        Math.pow(rgb1[1] - rgb2[1], 2) +
+        Math.pow(rgb1[2] - rgb2[2], 2)
+    );
+}
+
+// Component Snippets
+function setupSnippetInteractions() {
+    // Delegate click events on preview frame
+    previewFrame.addEventListener('click', (e) => {
+        // Find closest interactive element or container
+        // For simplicity, let's target specific classes we know exist in our layouts
+        const target = e.target.closest('.preview-btn, .preview-card, .product-card, nav, header, footer, .dashboard-sidebar');
+        
+        if (target) {
+            e.stopPropagation();
+            showSnippetModal(target);
+        }
+    });
+    
+    // Add hover effect class
+    previewFrame.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('.preview-btn, .preview-card, .product-card, nav, header, footer, .dashboard-sidebar');
+        if (target) {
+            target.classList.add('interactive-element');
+        }
+    });
+    
+    previewFrame.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('.interactive-element');
+        if (target) {
+            target.classList.remove('interactive-element');
+        }
+    });
+}
+
+function showSnippetModal(element) {
+    const modal = document.getElementById('snippet-modal');
+    const codeArea = document.getElementById('snippet-code');
+    
+    // Clone to clean up for display
+    const clone = element.cloneNode(true);
+    clone.classList.remove('interactive-element');
+    
+    // Get computed styles that are relevant (simplified)
+    // In a real app, we might have pre-defined snippets. 
+    // Here we will just show the HTML structure.
+    
+    let snippet = clone.outerHTML;
+    
+    // Prettify simple
+    snippet = snippet.replace(/></g, '>\n<');
+    
+    codeArea.value = snippet;
+    modal.style.display = 'block';
+}
+
+// Modal Logic
+const modal = document.getElementById('snippet-modal');
+const closeModal = document.querySelector('.close-modal');
+const copySnippetBtn = document.getElementById('copy-snippet-btn');
+
+if (closeModal) {
+    closeModal.onclick = function() {
+        modal.style.display = "none";
+    }
+}
+
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+if (copySnippetBtn) {
+    copySnippetBtn.onclick = function() {
+        copyToClipboard(document.getElementById('snippet-code').value);
+    }
+}
+
 
 // URL Hash / Deep Linking
 function updateHash() {
